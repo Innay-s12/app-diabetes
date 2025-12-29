@@ -722,90 +722,36 @@
             </div>
         </div>
     </div>
-
 <script>
 // =============================
-// 🔐 SESSION MANAGEMENT - UPDATED FOR NEW STRUCTURE
+// 🔐 SESSION MANAGEMENT - UPDATED FOR CONFIG.JS
 // =============================
 
-// API BASE URL - SESUAI DENGAN SERVER.JS
-const API_BASE_URL = 'http://localhost:8000';
-
-// Fungsi untuk cek session yang lebih robust
+// Fungsi untuk cek session
 function checkSession() {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
     const adminName = sessionStorage.getItem('adminName');
-    const loginTime = sessionStorage.getItem('loginTime');
     
-    console.log('🔍 Session check:', { 
-        isLoggedIn, 
-        adminName, 
-        loginTime
-    });
+    console.log('🔍 Session check:', { isLoggedIn, adminName });
     
-    // Jika tidak ada data session sama sekali, redirect ke login
-    if (!isLoggedIn && !adminName) {
-        console.log('❌ No session data found, redirecting to login');
-        showMessage('Sesi telah berakhir. Silakan login kembali.', 'error');
+    // Jika belum login, redirect ke login
+    if (!isLoggedIn || isLoggedIn !== 'true') {
+        console.log('❌ Not logged in, redirecting to login');
+        showMessage('Silakan login terlebih dahulu', 'error');
         setTimeout(() => {
             window.location.href = 'login.html';
-        }, 2000);
+        }, 1500);
         return false;
     }
     
-    // Jika isLoggedIn ada dan bernilai true
-    if (isLoggedIn && isLoggedIn === 'true') {
-        console.log('✅ Valid session found based on isLoggedIn');
-        
-        // Cek session age jika loginTime ada
-        if (loginTime) {
-            const currentTime = Date.now();
-            const sessionAge = currentTime - parseInt(loginTime);
-            const twentyFourHours = 24 * 60 * 60 * 1000;
-            
-            console.log('⏰ Session age check:', {
-                sessionAge,
-                isValid: sessionAge < twentyFourHours
-            });
-            
-            if (sessionAge >= twentyFourHours) {
-                console.log('⚠️ Session expired, clearing...');
-                sessionStorage.clear();
-                showMessage('Sesi telah berakhir. Silakan login kembali.', 'error');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 2000);
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    // Fallback: jika ada adminName, anggap sudah login
-    if (adminName) {
-        console.log('⚠️ isLoggedIn missing but adminName exists, setting session...');
-        sessionStorage.setItem('isLoggedIn', 'true');
-        // Set loginTime jika tidak ada
-        if (!loginTime) {
-            sessionStorage.setItem('loginTime', Date.now().toString());
-        }
-        return true;
-    }
-    
-    console.log('❌ Invalid session, redirecting to login');
-    showMessage('Sesi tidak valid. Silakan login kembali.', 'error');
-    setTimeout(() => {
-        window.location.href = 'login.html';
-    }, 2000);
-    return false;
+    return true;
 }
 
-// Initialize dashboard dengan session check
+// Initialize dashboard
 function initializeDashboard() {
     console.log('🎯 Initializing dashboard...');
     
-    // Cek session terlebih dahulu
+    // Cek session
     if (!checkSession()) {
         return;
     }
@@ -814,24 +760,18 @@ function initializeDashboard() {
         // Update user info
         const adminName = sessionStorage.getItem('adminName') || 'Administrator';
         const adminFullName = sessionStorage.getItem('adminFullName') || adminName;
-        console.log('👤 Admin name:', adminName, 'Full name:', adminFullName);
         
-        // Update UI dengan nama admin
+        // Update UI
         const userNameElement = document.getElementById('userName');
         if (userNameElement) {
             userNameElement.textContent = adminFullName;
         }
         
-        // Update avatar dengan inisial
+        // Update avatar
         const userAvatar = document.getElementById('userAvatar');
         if (userAvatar) {
             const initial = adminFullName.charAt(0).toUpperCase();
             userAvatar.textContent = initial;
-            userAvatar.style.cssText = `
-                width: 40px; height: 40px; border-radius: 50%; background: #e3f2fd; 
-                display: flex; align-items: center; justify-content: center; 
-                color: #1565c0; font-weight: bold; margin-right: 10px; font-size: 16px;
-            `;
         }
         
         // Setup logout button
@@ -847,13 +787,11 @@ function initializeDashboard() {
             });
         }
         
-        // Check system status
+        // Check system status dan load data
         checkSystemStatus();
-        
-        // Load dashboard data
         loadDashboardData();
         
-        console.log('🎉 Dashboard fully initialized');
+        console.log('🎉 Dashboard initialized');
         
     } catch (error) {
         console.error('❌ Error initializing dashboard:', error);
@@ -862,83 +800,56 @@ function initializeDashboard() {
 }
 
 // =============================
-// 📊 DASHBOARD FUNCTIONS - UPDATED FOR NEW API
+// 📊 DASHBOARD FUNCTIONS - USING CONFIG.JS
 // =============================
-
-async function fetchFromAPI(endpoint, options = {}) {
-    try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            ...options
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error(`❌ Error fetching from ${endpoint}:`, error);
-        throw error;
-    }
-}
 
 async function checkSystemStatus() {
     try {
-        // Check API status
-        const response = await fetch(`${API_BASE_URL}/test-db`);
         const apiStatusElement = document.getElementById('apiStatus');
         const dbStatusElement = document.getElementById('dbStatus');
         
-        if (response.ok) {
+        // Check API health menggunakan config.js
+        const healthData = await window.API_CONFIG.fetchApi(window.API_CONFIG.ENDPOINTS.HEALTH);
+        
+        if (healthData && healthData.status === 'OK') {
             apiStatusElement.textContent = 'Online';
             apiStatusElement.style.color = '#4caf50';
-            
-            const data = await response.json();
-            if (data.message === 'Database connection successful') {
-                dbStatusElement.textContent = 'Connected';
-                dbStatusElement.style.color = '#4caf50';
-            } else {
-                dbStatusElement.textContent = 'Error';
-                dbStatusElement.style.color = '#f44336';
-            }
         } else {
             apiStatusElement.textContent = 'Offline';
             apiStatusElement.style.color = '#f44336';
+        }
+        
+        // Check database connection
+        const dbData = await window.API_CONFIG.fetchApi(window.API_CONFIG.ENDPOINTS.TEST_DB);
+        
+        if (dbData && dbData.success) {
+            dbStatusElement.textContent = 'Connected';
+            dbStatusElement.style.color = '#4caf50';
+        } else {
             dbStatusElement.textContent = 'Disconnected';
             dbStatusElement.style.color = '#f44336';
         }
         
-        // Set security status
-        const securityStatusElement = document.getElementById('securityStatus');
-        securityStatusElement.textContent = 'Active';
-        securityStatusElement.style.color = '#4caf50';
+        // Set other status
+        document.getElementById('securityStatus').textContent = 'Active';
+        document.getElementById('securityStatus').style.color = '#4caf50';
         
-        // Set performance status
-        const performanceStatusElement = document.getElementById('performanceStatus');
-        performanceStatusElement.textContent = 'Optimal';
-        performanceStatusElement.style.color = '#4caf50';
+        document.getElementById('performanceStatus').textContent = 'Optimal';
+        document.getElementById('performanceStatus').style.color = '#4caf50';
         
     } catch (error) {
         console.error('❌ Error checking system status:', error);
         
-        // Update status elements with error
-        const apiStatusElement = document.getElementById('apiStatus');
-        apiStatusElement.textContent = 'Offline';
-        apiStatusElement.style.color = '#f44336';
+        document.getElementById('apiStatus').textContent = 'Offline';
+        document.getElementById('apiStatus').style.color = '#f44336';
         
-        const dbStatusElement = document.getElementById('dbStatus');
-        dbStatusElement.textContent = 'Error';
-        dbStatusElement.style.color = '#f44336';
+        document.getElementById('dbStatus').textContent = 'Error';
+        document.getElementById('dbStatus').style.color = '#f44336';
     }
 }
 
 async function loadDashboardData() {
-    console.log('📈 Loading dashboard data from API...');
+    console.log('📈 Loading dashboard data using config.js...');
     
     try {
         // Show loading state
@@ -951,60 +862,49 @@ async function loadDashboardData() {
             </tr>
         `;
         
-        // Load data from API
+        // Load data menggunakan API_CONFIG
         const [usersData, diagnosesData, recommendationsData, symptomsData, statsData] = await Promise.all([
-            fetchFromAPI('/users').catch(() => []),
-            fetchFromAPI('/diagnoses').catch(() => []),
-            fetchFromAPI('/recommendations').catch(() => []),
-            fetchFromAPI('/symptoms').catch(() => []),
-            fetchFromAPI('/stats').catch(() => null)
+            window.API_CONFIG.fetchApi(window.API_CONFIG.ENDPOINTS.USERS).catch(() => []),
+            window.API_CONFIG.fetchApi(window.API_CONFIG.ENDPOINTS.DIAGNOSES).catch(() => []),
+            window.API_CONFIG.fetchApi(window.API_CONFIG.ENDPOINTS.RECOMMENDATIONS).catch(() => []),
+            window.API_CONFIG.fetchApi(window.API_CONFIG.ENDPOINTS.SYMPTOMS).catch(() => []),
+            window.API_CONFIG.fetchApi(window.API_CONFIG.ENDPOINTS.STATS).catch(() => null)
         ]);
         
-        // Update stats with real data
+        // Update stats
         if (statsData) {
-            // Use stats endpoint if available
+            // Gunakan data dari stats endpoint
             document.getElementById('totalUsers').textContent = statsData.total_users || 0;
             document.getElementById('totalDiagnoses').textContent = statsData.total_diagnoses || 0;
             document.getElementById('totalRecommendations').textContent = statsData.total_recommendations || 0;
             document.getElementById('totalSymptoms').textContent = statsData.total_symptoms || 0;
         } else {
-            // Fallback to counting arrays
+            // Fallback: hitung dari array data
             document.getElementById('totalUsers').textContent = usersData.length || 0;
             document.getElementById('totalDiagnoses').textContent = diagnosesData.length || 0;
             document.getElementById('totalRecommendations').textContent = recommendationsData.length || 0;
             document.getElementById('totalSymptoms').textContent = symptomsData.length || 0;
         }
         
-        // Update activity table with real data
+        // Update activity table
         await updateActivityTable(diagnosesData, usersData);
         
         // Update last update time
         document.getElementById('lastUpdateTime').textContent = 
             `Update terakhir: ${new Date().toLocaleString('id-ID')}`;
             
-        console.log('✅ Dashboard data loaded from API');
+        console.log('✅ Dashboard data loaded successfully');
         showMessage('Data dashboard berhasil diperbarui', 'success');
             
     } catch (error) {
         console.error('❌ Error loading dashboard:', error);
         showMessage('Gagal memuat data dashboard: ' + error.message, 'error');
-        
-        // Fallback to static data if API fails
-        loadStaticData();
+        loadStaticData(); // Fallback ke data statis
     }
 }
 
 async function updateActivityTable(diagnoses = [], users = []) {
     try {
-        // If no data provided, fetch it
-        if (diagnoses.length === 0) {
-            diagnoses = await fetchFromAPI('/diagnoses').catch(() => []);
-        }
-        
-        if (users.length === 0) {
-            users = await fetchFromAPI('/users').catch(() => []);
-        }
-        
         const tableBody = document.getElementById('activityTableBody');
         
         if (!diagnoses || diagnoses.length === 0) {
@@ -1041,8 +941,8 @@ async function updateActivityTable(diagnoses = [], users = []) {
                     time: timeAgo,
                     user: userName,
                     activity: 'Diagnosa',
-                    detail: `Skor: ${diagnosis.skor_akhir} | ${diagnosis.tingkat_risiko}`,
-                    status: diagnosis.tingkat_risiko,
+                    detail: `Skor: ${diagnosis.skor_akhir || 0} | ${diagnosis.tingkat_risiko || 'Unknown'}`,
+                    status: diagnosis.tingkat_risiko || 'Unknown',
                     badgeClass: badgeClass,
                     userInitial: userName.charAt(0).toUpperCase()
                 };
@@ -1085,44 +985,42 @@ async function updateActivityTable(diagnoses = [], users = []) {
     }
 }
 
-// Fallback function if API fails
+// Fallback function jika API fails
 function loadStaticData() {
     console.log('🔄 Using static data as fallback');
     
-    // Get counts from your actual database dump
-    document.getElementById('totalUsers').textContent = '34'; // From users table
-    document.getElementById('totalDiagnoses').textContent = '9'; // From diagnoses table
-    document.getElementById('totalRecommendations').textContent = '4'; // From recommendations table
-    document.getElementById('totalSymptoms').textContent = '6'; // From symptoms table
+    document.getElementById('totalUsers').textContent = '15';
+    document.getElementById('totalDiagnoses').textContent = '42';
+    document.getElementById('totalRecommendations').textContent = '6';
+    document.getElementById('totalSymptoms').textContent = '8';
     
-    // Show static activity data
     const staticActivities = [
         {
             time: '2 jam lalu',
-            user: 'Udin',
+            user: 'Ahmad',
             activity: 'Diagnosa',
-            detail: 'Skor: 0.85 | Tingkat Risiko: Tinggi',
+            detail: 'Skor: 85 | Tingkat Risiko: Tinggi',
             status: 'Tinggi',
             badgeClass: 'badge-danger',
-            userInitial: 'U'
+            userInitial: 'A'
         },
         {
             time: '3 jam lalu', 
-            user: 'Intan',
+            user: 'Siti',
             activity: 'Diagnosa',
-            detail: 'Skor: 0.78 | Tingkat Risiko: Tinggi',
-            status: 'Tinggi',
-            badgeClass: 'badge-danger',
-            userInitial: 'I'
+            detail: 'Skor: 65 | Tingkat Risiko: Sedang',
+            status: 'Sedang',
+            badgeClass: 'badge-warning',
+            userInitial: 'S'
         },
         {
             time: '5 jam lalu',
-            user: 'Putri',
+            user: 'Budi',
             activity: 'Diagnosa', 
-            detail: 'Skor: 0.60 | Tingkat Risiko: Rendah',
+            detail: 'Skor: 40 | Tingkat Risiko: Rendah',
             status: 'Rendah',
             badgeClass: 'badge-success',
-            userInitial: 'P'
+            userInitial: 'B'
         }
     ];
     
@@ -1152,7 +1050,6 @@ function loadStaticData() {
         `).join('');
     }
     
-    // Update last update time
     document.getElementById('lastUpdateTime').textContent = 
         `Update terakhir: ${new Date().toLocaleString('id-ID')} (Data Statis)`;
 }
@@ -1209,6 +1106,31 @@ function showMessage(message, type) {
 // Initialize dashboard ketika halaman dimuat
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 DOM loaded, initializing dashboard...');
+    
+    // Cek jika config.js sudah loaded
+    if (!window.API_CONFIG) {
+        console.error('❌ API_CONFIG not found! Make sure config.js is loaded before this script.');
+        showMessage('Error: Konfigurasi API tidak ditemukan', 'error');
+        
+        // Create fallback config
+        window.API_CONFIG = {
+            BASE_URL: window.location.origin,
+            ENDPOINTS: {
+                USERS: '/api/users',
+                DIAGNOSES: '/api/diagnoses',
+                RECOMMENDATIONS: '/api/recommendations',
+                SYMPTOMS: '/api/symptoms',
+                STATS: '/api/stats',
+                TEST_DB: '/test-db',
+                HEALTH: '/health'
+            },
+            fetchApi: async function(endpoint) {
+                const response = await fetch(this.BASE_URL + endpoint);
+                return response.json();
+            }
+        };
+    }
+    
     initializeDashboard();
 });
 
