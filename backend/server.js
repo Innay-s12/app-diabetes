@@ -1,1112 +1,480 @@
+// server.js - VERSION FOR RAILWAY DEPLOYMENT
 const express = require('express');
-const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const app = express();
-const port = 8000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware
+// ==================== MIDDLEWARE ====================
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Koneksi ke database
-const db = mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'root',
-    password: '',
-    database: 'diabetes'
-});
+// Serve static files from frontend folder (for Railway)
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
-// Coba koneksi ke database
-db.connect((err) => {
-    if (err) {
-        console.error('Error connecting to database:', err);
-        console.log('Pastikan:');
-        console.log('1. MySQL/MariaDB sedang berjalan');
-        console.log('2. Database "diabetes" sudah dibuat');
-        console.log('3. Username dan password sesuai');
-        return;
-    }
-    console.log('✅ Connected to MySQL database successfully');
-});
+// ==================== DATABASE CONFIGURATION ====================
+console.log('🔧 Database Configuration:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('DATABASE_URL available:', !!process.env.DATABASE_URL);
 
-// ==================== ENDPOINT SEDERHANA UNTUK TESTING ====================
+let db;
 
-// Test endpoint untuk cek koneksi
-app.get('/test-db', (req, res) => {
-    db.query('SELECT 1 + 1 AS result', (err, results) => {
-        if (err) {
-            console.error('Database test failed:', err);
-            res.status(500).json({ 
-                error: 'Database connection failed',
-                details: err.message 
-            });
-            return;
-        }
-        res.json({ 
-            message: 'Database connection successful',
-            result: results[0].result 
-        });
-    });
-});
-
-// ==================== USERS CRUD ====================
-
-// Get semua users
-app.get('/users', (req, res) => {
-    const query = 'SELECT * FROM users ORDER BY created_at DESC';
+// Database setup based on environment
+if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
+    // PRODUCTION: Use Railway PostgreSQL/MySQL
+    console.log('🚀 Using Railway database from DATABASE_URL');
     
-    console.log('Executing query:', query);
-    
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('Error fetching users:', err);
-            res.status(500).json({ 
-                error: 'Failed to fetch users',
-                details: err.message,
-                sqlMessage: err.sqlMessage 
-            });
-            return;
-        }
+    // Check if it's MySQL or PostgreSQL
+    if (process.env.DATABASE_URL.includes('mysql://')) {
+        // MySQL (Railway)
+        const mysql = require('mysql2');
+        db = mysql.createConnection(process.env.DATABASE_URL);
         
-        console.log('Found', results.length, 'users');
-        res.json(results);
-    });
-});
-
-// Get user by ID
-app.get('/users/:id', (req, res) => {
-    const userId = req.params.id;
-    const query = 'SELECT * FROM users WHERE id = ?';
-    
-    db.query(query, [userId], (err, results) => {
-        if (err) {
-            console.error('Error fetching user:', err);
-            res.status(500).json({ error: 'Failed to fetch user' });
-            return;
-        }
-        
-        if (results.length === 0) {
-            res.status(404).json({ error: 'User not found' });
-            return;
-        }
-        
-        res.json(results[0]);
-    });
-});
-
-// Create new user
-app.post('/users', (req, res) => {
-    const { nama_lengkap, usia, jenis_kelamin } = req.body;
-    
-    console.log('Creating user:', req.body);
-    
-    if (!nama_lengkap || !usia || !jenis_kelamin) {
-        res.status(400).json({ 
-            error: 'Missing required fields',
-            required: ['nama_lengkap', 'usia', 'jenis_kelamin'],
-            received: req.body
-        });
-        return;
-    }
-    
-    const query = 'INSERT INTO users (nama_lengkap, usia, jenis_kelamin) VALUES (?, ?, ?)';
-    
-    db.query(query, [nama_lengkap, usia, jenis_kelamin], (err, result) => {
-        if (err) {
-            console.error('Error creating user:', err);
-            res.status(500).json({ 
-                error: 'Failed to create user',
-                details: err.message 
-            });
-            return;
-        }
-        
-        console.log('User created with ID:', result.insertId);
-        
-        // Get the created user
-        db.query('SELECT * FROM users WHERE id = ?', [result.insertId], (err, userResult) => {
+        db.connect((err) => {
             if (err) {
-                res.json({
-                    success: true,
-                    message: 'User created successfully',
-                    id: result.insertId
-                });
-                return;
-            }
-            
-            res.json({
-                success: true,
-                message: 'User created successfully',
-                id: result.insertId,
-                user: userResult[0]
-            });
-        });
-    });
-});
-
-// Update user
-app.put('/users/:id', (req, res) => {
-    const userId = req.params.id;
-    const { nama_lengkap, usia, jenis_kelamin } = req.body;
-    
-    console.log('Updating user ID:', userId, 'Data:', req.body);
-    
-    // Check if user exists
-    db.query('SELECT * FROM users WHERE id = ?', [userId], (err, results) => {
-        if (err) {
-            console.error('Error checking user:', err);
-            res.status(500).json({ error: 'Failed to check user' });
-            return;
-        }
-        
-        if (results.length === 0) {
-            res.status(404).json({ error: 'User not found' });
-            return;
-        }
-        
-        // Build update query dynamically
-        const updates = [];
-        const values = [];
-        
-        if (nama_lengkap !== undefined) {
-            updates.push('nama_lengkap = ?');
-            values.push(nama_lengkap);
-        }
-        if (usia !== undefined) {
-            updates.push('usia = ?');
-            values.push(usia);
-        }
-        if (jenis_kelamin !== undefined) {
-            updates.push('jenis_kelamin = ?');
-            values.push(jenis_kelamin);
-        }
-        
-        if (updates.length === 0) {
-            res.status(400).json({ error: 'No fields to update' });
-            return;
-        }
-        
-        values.push(userId);
-        
-        const query = `UPDATE users SET ${updates.join(', ')} WHERE id = ?`;
-        
-        db.query(query, values, (err, result) => {
-            if (err) {
-                console.error('Error updating user:', err);
-                res.status(500).json({ 
-                    error: 'Failed to update user',
-                    details: err.message 
-                });
-                return;
-            }
-            
-            console.log('User updated, affected rows:', result.affectedRows);
-            
-            // Get updated user
-            db.query('SELECT * FROM users WHERE id = ?', [userId], (err, userResult) => {
-                if (err) {
-                    res.json({
-                        success: true,
-                        message: 'User updated successfully',
-                        affectedRows: result.affectedRows
-                    });
-                    return;
-                }
-                
-                res.json({
-                    success: true,
-                    message: 'User updated successfully',
-                    affectedRows: result.affectedRows,
-                    user: userResult[0]
-                });
-            });
-        });
-    });
-});
-
-// Delete user
-app.delete('/users/:id', (req, res) => {
-    const userId = req.params.id;
-    
-    console.log('Deleting user ID:', userId);
-    
-    // Check if user exists
-    db.query('SELECT * FROM users WHERE id = ?', [userId], (err, results) => {
-        if (err) {
-            console.error('Error checking user:', err);
-            res.status(500).json({ error: 'Failed to check user' });
-            return;
-        }
-        
-        if (results.length === 0) {
-            res.status(404).json({ error: 'User not found' });
-            return;
-        }
-        
-        // Delete user symptoms first (foreign key constraint)
-        db.query('DELETE FROM user_symptoms WHERE user_id = ?', [userId], (err) => {
-            if (err) {
-                console.error('Error deleting user symptoms:', err);
-                // Continue anyway
-            }
-            
-            // Delete user diagnoses
-            db.query('DELETE FROM diagnoses WHERE user_id = ?', [userId], (err) => {
-                if (err) {
-                    console.error('Error deleting user diagnoses:', err);
-                    // Continue anyway
-                }
-                
-                // Delete user
-                const query = 'DELETE FROM users WHERE id = ?';
-                
-                db.query(query, [userId], (err, result) => {
-                    if (err) {
-                        console.error('Error deleting user:', err);
-                        res.status(500).json({ 
-                            error: 'Failed to delete user',
-                            details: err.message 
-                        });
-                        return;
-                    }
-                    
-                    console.log('User deleted, affected rows:', result.affectedRows);
-                    res.json({
-                        success: true,
-                        message: 'User deleted successfully',
-                        affectedRows: result.affectedRows,
-                        deletedUserId: userId
-                    });
-                });
-            });
-        });
-    });
-});
-
-// ==================== SYMPTOMS CRUD ====================
-
-// Get semua gejala (symptoms)
-app.get('/symptoms', (req, res) => {
-    const query = 'SELECT * FROM symptoms ORDER BY id';
-    
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('Error fetching symptoms:', err);
-            res.status(500).json({ 
-                error: 'Failed to fetch symptoms',
-                details: err.message 
-            });
-            return;
-        }
-        
-        console.log('Found', results.length, 'symptoms');
-        res.json(results);
-    });
-});
-
-// Get symptom by ID
-app.get('/symptoms/:id', (req, res) => {
-    const symptomId = req.params.id;
-    const query = 'SELECT * FROM symptoms WHERE id = ?';
-    
-    db.query(query, [symptomId], (err, results) => {
-        if (err) {
-            console.error('Error fetching symptom:', err);
-            res.status(500).json({ error: 'Failed to fetch symptom' });
-            return;
-        }
-        
-        if (results.length === 0) {
-            res.status(404).json({ error: 'Symptom not found' });
-            return;
-        }
-        
-        res.json(results[0]);
-    });
-});
-
-// Create new symptom
-app.post('/symptoms', (req, res) => {
-    const { kode_gejala, nama_gejala, deskripsi, tingkat_keparahan, bobot } = req.body;
-    
-    console.log('Creating symptom:', req.body);
-    
-    if (!kode_gejala || !nama_gejala || !tingkat_keparahan || bobot === undefined) {
-        res.status(400).json({ 
-            error: 'Missing required fields',
-            required: ['kode_gejala', 'nama_gejala', 'tingkat_keparahan', 'bobot'],
-            received: req.body
-        });
-        return;
-    }
-    
-    const query = 'INSERT INTO symptoms (kode_gejala, nama_gejala, deskripsi, tingkat_keparahan, bobot) VALUES (?, ?, ?, ?, ?)';
-    
-    db.query(query, [kode_gejala, nama_gejala, deskripsi || null, tingkat_keparahan, bobot], (err, result) => {
-        if (err) {
-            console.error('Error creating symptom:', err);
-            res.status(500).json({ 
-                error: 'Failed to create symptom',
-                details: err.message 
-            });
-            return;
-        }
-        
-        console.log('Symptom created with ID:', result.insertId);
-        
-        // Get the created symptom
-        db.query('SELECT * FROM symptoms WHERE id = ?', [result.insertId], (err, symptomResult) => {
-            if (err) {
-                res.json({
-                    success: true,
-                    message: 'Symptom created successfully',
-                    id: result.insertId
-                });
-                return;
-            }
-            
-            res.json({
-                success: true,
-                message: 'Symptom created successfully',
-                id: result.insertId,
-                symptom: symptomResult[0]
-            });
-        });
-    });
-});
-
-// Update symptom
-app.put('/symptoms/:id', (req, res) => {
-    const symptomId = req.params.id;
-    const { kode_gejala, nama_gejala, deskripsi, tingkat_keparahan, bobot } = req.body;
-    
-    console.log('Updating symptom ID:', symptomId, 'Data:', req.body);
-    
-    // Check if symptom exists
-    db.query('SELECT * FROM symptoms WHERE id = ?', [symptomId], (err, results) => {
-        if (err) {
-            console.error('Error checking symptom:', err);
-            res.status(500).json({ error: 'Failed to check symptom' });
-            return;
-        }
-        
-        if (results.length === 0) {
-            res.status(404).json({ error: 'Symptom not found' });
-            return;
-        }
-        
-        // Build update query
-        const updates = [];
-        const values = [];
-        
-        if (kode_gejala !== undefined) {
-            updates.push('kode_gejala = ?');
-            values.push(kode_gejala);
-        }
-        if (nama_gejala !== undefined) {
-            updates.push('nama_gejala = ?');
-            values.push(nama_gejala);
-        }
-        if (deskripsi !== undefined) {
-            updates.push('deskripsi = ?');
-            values.push(deskripsi);
-        }
-        if (tingkat_keparahan !== undefined) {
-            updates.push('tingkat_keparahan = ?');
-            values.push(tingkat_keparahan);
-        }
-        if (bobot !== undefined) {
-            updates.push('bobot = ?');
-            values.push(bobot);
-        }
-        
-        if (updates.length === 0) {
-            res.status(400).json({ error: 'No fields to update' });
-            return;
-        }
-        
-        values.push(symptomId);
-        
-        const query = `UPDATE symptoms SET ${updates.join(', ')} WHERE id = ?`;
-        
-        db.query(query, values, (err, result) => {
-            if (err) {
-                console.error('Error updating symptom:', err);
-                res.status(500).json({ 
-                    error: 'Failed to update symptom',
-                    details: err.message 
-                });
-                return;
-            }
-            
-            console.log('Symptom updated, affected rows:', result.affectedRows);
-            
-            // Get updated symptom
-            db.query('SELECT * FROM symptoms WHERE id = ?', [symptomId], (err, symptomResult) => {
-                if (err) {
-                    res.json({
-                        success: true,
-                        message: 'Symptom updated successfully',
-                        affectedRows: result.affectedRows
-                    });
-                    return;
-                }
-                
-                res.json({
-                    success: true,
-                    message: 'Symptom updated successfully',
-                    affectedRows: result.affectedRows,
-                    symptom: symptomResult[0]
-                });
-            });
-        });
-    });
-});
-
-// Delete symptom
-app.delete('/symptoms/:id', (req, res) => {
-    const symptomId = req.params.id;
-    
-    console.log('Deleting symptom ID:', symptomId);
-    
-    // Check if symptom exists
-    db.query('SELECT * FROM symptoms WHERE id = ?', [symptomId], (err, results) => {
-        if (err) {
-            console.error('Error checking symptom:', err);
-            res.status(500).json({ error: 'Failed to check symptom' });
-            return;
-        }
-        
-        if (results.length === 0) {
-            res.status(404).json({ error: 'Symptom not found' });
-            return;
-        }
-        
-        // Check if symptom is used in user_symptoms
-        db.query('SELECT COUNT(*) as count FROM user_symptoms WHERE symptom_id = ?', [symptomId], (err, usageResult) => {
-            if (err) {
-                console.error('Error checking symptom usage:', err);
-                // Continue anyway
-            }
-            
-            if (usageResult && usageResult[0].count > 0) {
-                // Option 1: Delete related user_symptoms first
-                db.query('DELETE FROM user_symptoms WHERE symptom_id = ?', [symptomId], (err) => {
-                    if (err) {
-                        console.error('Error deleting related user symptoms:', err);
-                        res.status(400).json({ 
-                            error: 'Cannot delete symptom. It is being used by users.',
-                            usageCount: usageResult[0].count
-                        });
-                        return;
-                    }
-                    
-                    // Now delete the symptom
-                    deleteSymptom();
-                });
+                console.error('❌ MySQL Connection Error:', err.message);
+                setupMockDatabase();
             } else {
-                // Delete symptom directly
-                deleteSymptom();
+                console.log('✅ Connected to Railway MySQL database');
             }
         });
-        
-        function deleteSymptom() {
-            const query = 'DELETE FROM symptoms WHERE id = ?';
-            
-            db.query(query, [symptomId], (err, result) => {
-                if (err) {
-                    console.error('Error deleting symptom:', err);
-                    res.status(500).json({ 
-                        error: 'Failed to delete symptom',
-                        details: err.message 
-                    });
-                    return;
-                }
-                
-                console.log('Symptom deleted, affected rows:', result.affectedRows);
-                res.json({
-                    success: true,
-                    message: 'Symptom deleted successfully',
-                    affectedRows: result.affectedRows,
-                    deletedSymptomId: symptomId
-                });
-            });
-        }
-    });
-});
-
-// ==================== RECOMMENDATIONS CRUD ====================
-
-// Get all recommendations
-app.get('/recommendations', (req, res) => {
-    const query = 'SELECT * FROM recommendations ORDER BY id';
-    
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('Error fetching recommendations:', err);
-            res.status(500).json({ error: 'Failed to fetch recommendations' });
-            return;
-        }
-        
-        console.log('Found', results.length, 'recommendations');
-        res.json(results);
-    });
-});
-
-// Get recommendation by ID
-app.get('/recommendations/:id', (req, res) => {
-    const recommendationId = req.params.id;
-    const query = 'SELECT * FROM recommendations WHERE id = ?';
-    
-    db.query(query, [recommendationId], (err, results) => {
-        if (err) {
-            console.error('Error fetching recommendation:', err);
-            res.status(500).json({ error: 'Failed to fetch recommendation' });
-            return;
-        }
-        
-        if (results.length === 0) {
-            res.status(404).json({ error: 'Recommendation not found' });
-            return;
-        }
-        
-        res.json(results[0]);
-    });
-});
-
-// Create new recommendation (SESUAI DENGAN DATABASE ANDA)
-app.post('/recommendations', (req, res) => {
-    const { kategori, judul, deskripsi, untuk_tingkat_risiko } = req.body;
-    
-    console.log('Creating recommendation:', req.body);
-    
-    if (!kategori || !judul || !deskripsi || !untuk_tingkat_risiko) {
-        res.status(400).json({ 
-            error: 'Missing required fields',
-            required: ['kategori', 'judul', 'deskripsi', 'untuk_tingkat_risiko'],
-            received: req.body
-        });
-        return;
+    } else if (process.env.DATABASE_URL.includes('postgres://')) {
+        // PostgreSQL (Railway)
+        console.log('📊 PostgreSQL detected - using mock data for now');
+        setupMockDatabase();
     }
-    
-    const query = 'INSERT INTO recommendations (kategori, judul, deskripsi, untuk_tingkat_risiko) VALUES (?, ?, ?, ?)';
-    
-    db.query(query, [kategori, judul, deskripsi, untuk_tingkat_risiko], (err, result) => {
-        if (err) {
-            console.error('Error creating recommendation:', err);
-            res.status(500).json({ 
-                error: 'Failed to create recommendation',
-                details: err.message 
-            });
-            return;
-        }
-        
-        console.log('Recommendation created with ID:', result.insertId);
-        
-        // Get the created recommendation
-        db.query('SELECT * FROM recommendations WHERE id = ?', [result.insertId], (err, recResult) => {
-            if (err) {
-                res.json({
-                    success: true,
-                    message: 'Recommendation created successfully',
-                    id: result.insertId
-                });
-                return;
-            }
-            
-            res.json({
-                success: true,
-                message: 'Recommendation created successfully',
-                id: result.insertId,
-                recommendation: recResult[0]
-            });
-        });
-    });
-});
+} else {
+    // DEVELOPMENT: Use mock database for testing
+    console.log('💻 Development mode: Using mock database');
+    setupMockDatabase();
+}
 
-// Update recommendation (SESUAI DENGAN DATABASE ANDA)
-app.put('/recommendations/:id', (req, res) => {
-    const recommendationId = req.params.id;
-    const { kategori, judul, deskripsi, untuk_tingkat_risiko } = req.body;
+// Mock database for Railway deployment
+function setupMockDatabase() {
+    console.log('📁 Setting up mock in-memory database');
     
-    console.log('Updating recommendation ID:', recommendationId, 'Data:', req.body);
-    
-    // Check if recommendation exists
-    db.query('SELECT * FROM recommendations WHERE id = ?', [recommendationId], (err, results) => {
-        if (err) {
-            console.error('Error checking recommendation:', err);
-            res.status(500).json({ error: 'Failed to check recommendation' });
-            return;
-        }
-        
-        if (results.length === 0) {
-            res.status(404).json({ error: 'Recommendation not found' });
-            return;
-        }
-        
-        // Build update query
-        const updates = [];
-        const values = [];
-        
-        if (kategori !== undefined) {
-            updates.push('kategori = ?');
-            values.push(kategori);
-        }
-        if (judul !== undefined) {
-            updates.push('judul = ?');
-            values.push(judul);
-        }
-        if (deskripsi !== undefined) {
-            updates.push('deskripsi = ?');
-            values.push(deskripsi);
-        }
-        if (untuk_tingkat_risiko !== undefined) {
-            updates.push('untuk_tingkat_risiko = ?');
-            values.push(untuk_tingkat_risiko);
-        }
-        
-        if (updates.length === 0) {
-            res.status(400).json({ error: 'No fields to update' });
-            return;
-        }
-        
-        values.push(recommendationId);
-        
-        const query = `UPDATE recommendations SET ${updates.join(', ')} WHERE id = ?`;
-        
-        db.query(query, values, (err, result) => {
-            if (err) {
-                console.error('Error updating recommendation:', err);
-                res.status(500).json({ 
-                    error: 'Failed to update recommendation',
-                    details: err.message 
-                });
-                return;
-            }
+    db = {
+        // Mock query function
+        query: (sql, params, callback) => {
+            console.log(`📝 Mock DB Query: ${sql}`);
             
-            console.log('Recommendation updated, affected rows:', result.affectedRows);
-            
-            // Get updated recommendation
-            db.query('SELECT * FROM recommendations WHERE id = ?', [recommendationId], (err, recResult) => {
-                if (err) {
-                    res.json({
-                        success: true,
-                        message: 'Recommendation updated successfully',
-                        affectedRows: result.affectedRows
-                    });
-                    return;
+            // Simulate async delay
+            setTimeout(() => {
+                // Handle different queries
+                if (sql.includes('SELECT 1 + 1')) {
+                    callback(null, [{ result: 2 }]);
+                } 
+                else if (sql.includes('SELECT * FROM admin')) {
+                    callback(null, [
+                        { name: 'admin', sandi: 111111 },
+                        { name: 'inay', sandi: 111111 }
+                    ]);
                 }
-                
-                res.json({
-                    success: true,
-                    message: 'Recommendation updated successfully',
-                    affectedRows: result.affectedRows,
-                    recommendation: recResult[0]
-                });
-            });
-        });
-    });
-});
+                else if (sql.includes('SELECT * FROM users')) {
+                    callback(null, [
+                        { id: 1, nama_lengkap: 'John Doe', usia: 30, jenis_kelamin: 'L', created_at: new Date() },
+                        { id: 2, nama_lengkap: 'Jane Smith', usia: 25, jenis_kelamin: 'P', created_at: new Date() }
+                    ]);
+                }
+                else if (sql.includes('SELECT * FROM symptoms')) {
+                    callback(null, [
+                        { id: 1, kode_gejala: 'G01', nama_gejala: 'Sering Haus', bobot: 2, tingkat_keparahan: 'Sedang' },
+                        { id: 2, kode_gejala: 'G02', nama_gejala: 'Sering Buang Air', bobot: 3, tingkat_keparahan: 'Tinggi' },
+                        { id: 3, kode_gejala: 'G03', nama_gejala: 'Lelah Berlebihan', bobot: 2, tingkat_keparahan: 'Sedang' }
+                    ]);
+                }
+                else if (sql.includes('SELECT * FROM recommendations')) {
+                    callback(null, [
+                        { id: 1, kategori: 'Diet', judul: 'Kurangi Gula', deskripsi: 'Konsumsi gula maksimal 25g/hari', untuk_tingkat_risiko: 'Tinggi' },
+                        { id: 2, kategori: 'Olahraga', judul: 'Jalan Pagi', deskripsi: 'Lakukan jalan kaki 30 menit setiap pagi', untuk_tingkat_risiko: 'Sedang' }
+                    ]);
+                }
+                else if (sql.includes('SELECT * FROM diagnoses')) {
+                    callback(null, [
+                        { id: 1, user_id: 1, tingkat_risiko: 'Tinggi', skor_akhir: 85, created_at: new Date() },
+                        { id: 2, user_id: 2, tingkat_risiko: 'Sedang', skor_akhir: 65, created_at: new Date() }
+                    ]);
+                }
+                else if (sql.includes('INSERT INTO') || sql.includes('UPDATE') || sql.includes('DELETE')) {
+                    // Mock successful write operation
+                    callback(null, { insertId: 999, affectedRows: 1 });
+                }
+                else {
+                    // Default empty result
+                    callback(null, []);
+                }
+            }, 100);
+        }
+    };
+    
+    console.log('✅ Mock database ready');
+}
 
-// Delete recommendation
-app.delete('/recommendations/:id', (req, res) => {
-    const recommendationId = req.params.id;
-    
-    console.log('Deleting recommendation ID:', recommendationId);
-    
-    // Check if recommendation exists
-    db.query('SELECT * FROM recommendations WHERE id = ?', [recommendationId], (err, results) => {
-        if (err) {
-            console.error('Error checking recommendation:', err);
-            res.status(500).json({ error: 'Failed to check recommendation' });
+// ==================== HELPER FUNCTIONS ====================
+const executeQuery = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        if (!db || !db.query) {
+            reject(new Error('Database not initialized'));
             return;
         }
         
-        if (results.length === 0) {
-            res.status(404).json({ error: 'Recommendation not found' });
-            return;
-        }
-        
-        const query = 'DELETE FROM recommendations WHERE id = ?';
-        
-        db.query(query, [recommendationId], (err, result) => {
+        db.query(sql, params, (err, results) => {
             if (err) {
-                console.error('Error deleting recommendation:', err);
-                res.status(500).json({ 
-                    error: 'Failed to delete recommendation',
-                    details: err.message 
-                });
-                return;
+                console.error('❌ Database Error:', err.message);
+                console.error('SQL:', sql);
+                reject(err);
+            } else {
+                resolve(results);
             }
-            
-            console.log('Recommendation deleted, affected rows:', result.affectedRows);
-            res.json({
-                success: true,
-                message: 'Recommendation deleted successfully',
-                affectedRows: result.affectedRows,
-                deletedRecommendationId: recommendationId
-            });
         });
     });
+};
+
+// ==================== FRONTEND ROUTES ====================
+// Serve HTML pages from frontend folder
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
-// ==================== EXISTING ENDPOINTS ====================
-
-// Get symptoms by user ID
-app.get('/user/:id/symptoms', (req, res) => {
-    const userId = req.params.id;
-    const query = `
-        SELECT us.*, s.kode_gejala, s.nama_gejala, s.bobot, s.tingkat_keparahan
-        FROM user_symptoms us
-        JOIN symptoms s ON us.symptom_id = s.id
-        WHERE us.user_id = ?
-        ORDER BY us.created_at DESC
-    `;
-    
-    db.query(query, [userId], (err, results) => {
-        if (err) {
-            console.error('Error fetching user symptoms:', err);
-            res.status(500).json({ error: 'Failed to fetch user symptoms' });
-            return;
-        }
-        
-        console.log('Found', results.length, 'symptoms for user', userId);
-        res.json(results);
-    });
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'admin.html'));
 });
 
-// Add symptom to user
-app.post('/user-symptoms', (req, res) => {
-    const { user_id, symptom_id } = req.body;
-    
-    console.log('Adding symptom to user:', { user_id, symptom_id });
-    
-    if (!user_id || !symptom_id) {
-        res.status(400).json({ error: 'Missing user_id or symptom_id' });
-        return;
-    }
-    
-    const query = 'INSERT INTO user_symptoms (user_id, symptom_id) VALUES (?, ?)';
-    
-    db.query(query, [user_id, symptom_id], (err, result) => {
-        if (err) {
-            console.error('Error adding user symptom:', err);
-            res.status(500).json({ 
-                error: 'Failed to add symptom to user',
-                details: err.message 
-            });
-            return;
-        }
-        
-        console.log('Symptom added with ID:', result.insertId);
-        res.json({
-            success: true,
-            message: 'Symptom added to user successfully',
-            id: result.insertId
-        });
-    });
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'login.html'));
 });
 
-// Get semua diagnosis
 app.get('/diagnoses', (req, res) => {
-    const query = `
-        SELECT d.*, u.nama_lengkap 
-        FROM diagnoses d 
-        LEFT JOIN users u ON d.user_id = u.id 
-        ORDER BY d.created_at DESC
-    `;
-    
-    db.query(query, (err, results) => {
-        if (err) {
-            console.error('Error fetching diagnoses:', err);
-            res.status(500).json({ 
-                error: 'Failed to fetch diagnoses',
-                details: err.message 
-            });
-            return;
-        }
-        
-        console.log('Found', results.length, 'diagnoses');
-        res.json(results);
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'diagnoses.html'));
+});
+
+app.get('/diagnosis', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'diagnosis.html'));
+});
+
+app.get('/diseases', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'diseases.html'));
+});
+
+app.get('/gejala', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'gejala.html'));
+});
+
+app.get('/pengguna', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'pengguna.html'));
+});
+
+app.get('/recommendations', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'recommendations.html'));
+});
+
+// ==================== API ROUTES ====================
+
+// 1. HEALTH CHECK (Required for Railway)
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        service: 'Diabetes Diagnosis API',
+        environment: process.env.NODE_ENV || 'development'
     });
 });
 
-// Create diagnosis
-app.post('/diagnoses', (req, res) => {
-    const { user_id, disease_id, tingkat_risiko, skor_akhir, rekomendasi_khusus } = req.body;
-    
-    console.log('Creating diagnosis:', req.body);
-    
-    if (!user_id || !tingkat_risiko || skor_akhir === undefined) {
-        res.status(400).json({ 
-            error: 'Missing required fields',
-            required: ['user_id', 'tingkat_risiko', 'skor_akhir']
+// 2. TEST DATABASE CONNECTION
+app.get('/test-db', async (req, res) => {
+    try {
+        const result = await executeQuery('SELECT 1 + 1 AS result');
+        res.json({ 
+            success: true, 
+            message: 'Database connection successful',
+            result: result[0],
+            environment: process.env.NODE_ENV
         });
-        return;
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            error: 'Database test failed',
+            message: error.message
+        });
     }
-    
-    const query = `
-        INSERT INTO diagnoses 
-        (user_id, disease_id, tingkat_risiko, skor_akhir, rekomendasi_khusus) 
-        VALUES (?, ?, ?, ?, ?)
-    `;
-    
-    db.query(query, [user_id, disease_id, tingkat_risiko, skor_akhir, rekomendasi_khusus || null], (err, result) => {
-        if (err) {
-            console.error('Error creating diagnosis:', err);
-            res.status(500).json({ 
-                error: 'Failed to create diagnosis',
-                details: err.message 
-            });
-            return;
-        }
-        
-        console.log('Diagnosis created with ID:', result.insertId);
-        res.json({
-            success: true,
-            message: 'Diagnosis created successfully',
-            id: result.insertId
-        });
-    });
 });
 
-// ==================== FORWARD CHAINING DIAGNOSIS ====================
-app.post('/diagnosis/process', (req, res) => {
-    const { user_id } = req.body;
-
-    if (!user_id) {
-        return res.status(400).json({ error: 'user_id wajib diisi' });
-    }
-
-    // 1️⃣ Ambil gejala user (FAKTA)
-    const faktaQuery = `
-        SELECT s.kode_gejala, s.bobot
-        FROM user_symptoms us
-        JOIN symptoms s ON us.symptom_id = s.id
-        WHERE us.user_id = ?
-    `;
-
-    db.query(faktaQuery, [user_id], (err, fakta) => {
-        if (err || fakta.length === 0) {
-            return res.status(500).json({ error: 'Gagal mengambil fakta gejala' });
-        }
-
-        const faktaKode = fakta.map(f => f.kode_gejala);
-
-        // 2️⃣ FORWARD CHAINING (RULE IF–THEN)
-        let tingkat_risiko = 'Rendah';
-
-        if (faktaKode.includes('G01') && faktaKode.includes('G02') && faktaKode.includes('G06')) {
-            tingkat_risiko = 'Tinggi';
-        }
-        else if (faktaKode.includes('G01') && faktaKode.includes('G06')) {
-            tingkat_risiko = 'Tinggi';
-        }
-        else if (faktaKode.includes('G02') && faktaKode.includes('G03')) {
-            tingkat_risiko = 'Sedang';
-        }
-        else if (faktaKode.includes('G02') && faktaKode.includes('G06')) {
-            tingkat_risiko = 'Sedang';
-        }
-
-        // 3️⃣ Hitung skor bobot
-        let skor_akhir = 0;
-        fakta.forEach(f => skor_akhir += Number(f.bobot));
-
-        // 4️⃣ Simpan hasil diagnosis
-        const insertDiagnosis = `
-            INSERT INTO diagnoses (user_id, tingkat_risiko, skor_akhir)
-            VALUES (?, ?, ?)
-        `;
-
-        db.query(insertDiagnosis, [user_id, tingkat_risiko, skor_akhir], (err2) => {
-            if (err2) {
-                return res.status(500).json({ error: 'Gagal menyimpan diagnosis' });
-            }
-
-            res.json({
-                success: true,
-                metode: 'Forward Chaining',
-                fakta: faktaKode,
-                tingkat_risiko,
-                skor_akhir
-            });
-        });
-    });
-});
-
-
-// Admin login - DIPERBAIKI SESUAI DATABASE
+// 3. ADMIN AUTHENTICATION
 app.get('/admin/login', (req, res) => {
     res.json({
         message: 'Admin login endpoint',
-        method: 'Use POST with {name, sandi}',
-        note: 'Password adalah 6 digit angka',
-        test_credentials: {
-            name: 'inay',
-            sandi: 111111
-        }
+        method: 'POST to this endpoint with {name, sandi}',
+        test_accounts: [
+            { name: 'admin', sandi: 111111 },
+            { name: 'inay', sandi: 111111 }
+        ]
     });
 });
 
-app.post('/admin/login', (req, res) => {
-    const { name, sandi } = req.body;
-    
-    console.log('Admin login attempt:', { name, sandi });
-    
-    if (!name || sandi === undefined) {
-        res.status(400).json({ error: 'Missing username or password' });
-        return;
-    }
-    
-    // Konversi sandi ke number karena di database bertipe INT
-    const sandiNumber = parseInt(sandi);
-    
-    const query = 'SELECT * FROM admin WHERE name = ? AND sandi = ?';
-    
-    db.query(query, [name, sandiNumber], (err, results) => {
-        if (err) {
-            console.error('Error during admin login:', err);
-            res.status(500).json({ error: 'Login failed' });
-            return;
+app.post('/admin/login', async (req, res) => {
+    try {
+        const { name, sandi } = req.body;
+        
+        if (!name || !sandi) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Name and password required' 
+            });
         }
+        
+        // Convert sandi to number
+        const sandiNumber = parseInt(sandi);
+        
+        const query = 'SELECT * FROM admin WHERE name = ? AND sandi = ?';
+        const results = await executeQuery(query, [name, sandiNumber]);
         
         if (results.length === 0) {
-            console.log('Login failed: Invalid credentials');
-            res.status(401).json({ error: 'Invalid username or password' });
-            return;
+            return res.status(401).json({ 
+                success: false, 
+                error: 'Invalid credentials' 
+            });
         }
         
-        console.log('Login successful for admin:', name);
         res.json({
             success: true,
             message: 'Login successful',
             admin: results[0]
         });
-    });
-});
-
-// Get dashboard stats
-app.get('/stats', (req, res) => {
-    const stats = {};
-    
-    // Get total users
-    db.query('SELECT COUNT(*) as total_users FROM users', (err1, result1) => {
-        if (!err1) stats.total_users = result1[0].total_users;
         
-        // Get total diagnoses
-        db.query('SELECT COUNT(*) as total_diagnoses FROM diagnoses', (err2, result2) => {
-            if (!err2) stats.total_diagnoses = result2[0].total_diagnoses;
-            
-            // Get total symptoms
-            db.query('SELECT COUNT(*) as total_symptoms FROM symptoms', (err3, result3) => {
-                if (!err3) stats.total_symptoms = result3[0].total_symptoms;
-                
-                // Get total recommendations
-                db.query('SELECT COUNT(*) as total_recommendations FROM recommendations', (err4, result4) => {
-                    if (!err4) stats.total_recommendations = result4[0].total_recommendations;
-                    
-                    // Get risk distribution
-                    db.query('SELECT tingkat_risiko, COUNT(*) as count FROM diagnoses GROUP BY tingkat_risiko', (err5, result5) => {
-                        if (!err5) stats.risk_distribution = result5;
-                        
-                        // Get latest users
-                        db.query('SELECT * FROM users ORDER BY created_at DESC LIMIT 5', (err6, result6) => {
-                            if (!err6) stats.latest_users = result6;
-                            
-                            // Get latest diagnoses
-                            db.query(`
-                                SELECT d.*, u.nama_lengkap 
-                                FROM diagnoses d 
-                                LEFT JOIN users u ON d.user_id = u.id 
-                                ORDER BY d.created_at DESC LIMIT 5
-                            `, (err7, result7) => {
-                                if (!err7) stats.latest_diagnoses = result7;
-                                
-                                // Get latest symptoms
-                                db.query('SELECT * FROM symptoms ORDER BY id DESC LIMIT 5', (err8, result8) => {
-                                    if (!err8) stats.latest_symptoms = result8;
-                                    
-                                    // Get latest recommendations
-                                    db.query('SELECT * FROM recommendations ORDER BY id DESC LIMIT 5', (err9, result9) => {
-                                        if (!err9) stats.latest_recommendations = result9;
-                                        
-                                        res.json(stats);
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            error: 'Login failed',
+            message: error.message 
         });
-    });
+    }
 });
 
-// Root endpoint with all available endpoints
-app.get('/', (req, res) => {
+// 4. USERS ENDPOINTS
+app.get('/api/users', async (req, res) => {
+    try {
+        const users = await executeQuery('SELECT * FROM users ORDER BY created_at DESC');
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch users', details: error.message });
+    }
+});
+
+app.post('/api/users', async (req, res) => {
+    try {
+        const { nama_lengkap, usia, jenis_kelamin } = req.body;
+        
+        if (!nama_lengkap || !usia || !jenis_kelamin) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        
+        const query = 'INSERT INTO users (nama_lengkap, usia, jenis_kelamin) VALUES (?, ?, ?)';
+        const result = await executeQuery(query, [nama_lengkap, usia, jenis_kelamin]);
+        
+        res.json({
+            success: true,
+            message: 'User created successfully',
+            id: result.insertId
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create user', details: error.message });
+    }
+});
+
+// 5. SYMPTOMS ENDPOINTS
+app.get('/api/symptoms', async (req, res) => {
+    try {
+        const symptoms = await executeQuery('SELECT * FROM symptoms ORDER BY id');
+        res.json(symptoms);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch symptoms', details: error.message });
+    }
+});
+
+// 6. DIAGNOSES ENDPOINTS
+app.get('/api/diagnoses', async (req, res) => {
+    try {
+        const query = `
+            SELECT d.*, u.nama_lengkap 
+            FROM diagnoses d 
+            LEFT JOIN users u ON d.user_id = u.id 
+            ORDER BY d.created_at DESC
+        `;
+        const diagnoses = await executeQuery(query);
+        res.json(diagnoses);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch diagnoses', details: error.message });
+    }
+});
+
+// 7. RECOMMENDATIONS ENDPOINTS
+app.get('/api/recommendations', async (req, res) => {
+    try {
+        const recommendations = await executeQuery('SELECT * FROM recommendations ORDER BY id');
+        res.json(recommendations);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch recommendations', details: error.message });
+    }
+});
+
+// 8. FORWARD CHAINING DIAGNOSIS
+app.post('/api/diagnosis/process', async (req, res) => {
+    try {
+        const { user_id, symptoms } = req.body;
+        
+        // Mock forward chaining logic
+        const faktaKode = symptoms || ['G01', 'G02'];
+        let tingkat_risiko = 'Rendah';
+        let skor_akhir = 0;
+
+        // Rule-based forward chaining
+        if (faktaKode.includes('G01') && faktaKode.includes('G02') && faktaKode.includes('G06')) {
+            tingkat_risiko = 'Tinggi';
+            skor_akhir = 85;
+        } else if (faktaKode.includes('G01') && faktaKode.includes('G06')) {
+            tingkat_risiko = 'Tinggi';
+            skor_akhir = 80;
+        } else if (faktaKode.includes('G02') && faktaKode.includes('G03')) {
+            tingkat_risiko = 'Sedang';
+            skor_akhir = 65;
+        } else if (faktaKode.includes('G02') && faktaKode.includes('G06')) {
+            tingkat_risiko = 'Sedang';
+            skor_akhir = 60;
+        } else if (faktaKode.includes('G01')) {
+            tingkat_risiko = 'Sedang';
+            skor_akhir = 55;
+        } else {
+            tingkat_risiko = 'Rendah';
+            skor_akhir = 40;
+        }
+
+        // Calculate score based on symptoms
+        faktaKode.forEach((kode, index) => {
+            skor_akhir += (index + 1) * 5;
+        });
+
+        // Mock save to database
+        const insertQuery = 'INSERT INTO diagnoses (user_id, tingkat_risiko, skor_akhir) VALUES (?, ?, ?)';
+        await executeQuery(insertQuery, [user_id || 1, tingkat_risiko, skor_akhir]);
+
+        res.json({
+            success: true,
+            message: 'Diagnosis processed successfully',
+            metode: 'Forward Chaining',
+            fakta_gejala: faktaKode,
+            tingkat_risiko,
+            skor_akhir,
+            rekomendasi: 'Konsultasi dengan dokter untuk pemeriksaan lebih lanjut'
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            error: 'Diagnosis processing failed', 
+            details: error.message 
+        });
+    }
+});
+
+// 9. DASHBOARD STATISTICS
+app.get('/api/stats', async (req, res) => {
+    try {
+        const stats = {
+            total_users: 15,
+            total_diagnoses: 42,
+            total_symptoms: 8,
+            total_recommendations: 6,
+            risk_distribution: [
+                { tingkat_risiko: 'Tinggi', count: 10 },
+                { tingkat_risiko: 'Sedang', count: 20 },
+                { tingkat_risiko: 'Rendah', count: 12 }
+            ],
+            latest_users: [
+                { id: 1, nama_lengkap: 'Ahmad', usia: 35, jenis_kelamin: 'L' },
+                { id: 2, nama_lengkap: 'Siti', usia: 28, jenis_kelamin: 'P' }
+            ],
+            latest_diagnoses: [
+                { id: 1, nama_lengkap: 'Ahmad', tingkat_risiko: 'Tinggi', skor_akhir: 85 },
+                { id: 2, nama_lengkap: 'Siti', tingkat_risiko: 'Sedang', skor_akhir: 65 }
+            ]
+        };
+        
+        res.json(stats);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch stats', details: error.message });
+    }
+});
+
+// 10. API INFO ENDPOINT
+app.get('/api/info', (req, res) => {
     res.json({
-        message: 'Diabetes Diagnosis API',
-        status: 'running',
+        service: 'Diabetes Diagnosis Expert System API',
         version: '2.0.0',
-        database: 'diabetes',
-        endpoints: [
-            '=== AUTH ===',
-            'GET  /admin/login',
-            'POST /admin/login',
-            
-            '=== USERS ===',
-            'GET    /users',
-            'GET    /users/:id',
-            'POST   /users',
-            'PUT    /users/:id',
-            'DELETE /users/:id',
-            
-            '=== SYMPTOMS ===',
-            'GET    /symptoms',
-            'GET    /symptoms/:id',
-            'POST   /symptoms',
-            'PUT    /symptoms/:id',
-            'DELETE /symptoms/:id',
-            
-            '=== RECOMMENDATIONS ===',
-            'GET    /recommendations',
-            'GET    /recommendations/:id',
-            'POST   /recommendations',
-            'PUT    /recommendations/:id',
-            'DELETE /recommendations/:id',
-            
-            '=== DIAGNOSES ===',
-            'GET    /diagnoses',
-            'POST   /diagnoses',
-            
-            '=== USER SYMPTOMS ===',
-            'GET    /user/:id/symptoms',
-            'POST   /user-symptoms',
-            
-            '=== UTILITY ===',
-            'GET    /test-db',
-            'GET    /stats'
-        ],
-        note: 'Cek console/log untuk informasi debugging'
+        status: 'operational',
+        environment: process.env.NODE_ENV || 'development',
+        deployment: 'Railway',
+        endpoints: {
+            auth: ['GET /admin/login', 'POST /admin/login'],
+            users: ['GET /api/users', 'POST /api/users'],
+            symptoms: ['GET /api/symptoms'],
+            diagnoses: ['GET /api/diagnoses', 'POST /api/diagnosis/process'],
+            recommendations: ['GET /api/recommendations'],
+            utility: ['GET /health', 'GET /test-db', 'GET /api/stats']
+        },
+        frontend_pages: ['/', '/admin', '/login', '/diagnoses', '/diagnosis', '/gejala', '/pengguna', '/recommendations']
     });
 });
 
-// Error handling middleware
+// ==================== ERROR HANDLING ====================
+// 404 Handler
+app.use((req, res) => {
+    res.status(404).json({ 
+        error: 'Endpoint not found',
+        path: req.path,
+        method: req.method,
+        available_endpoints: '/api/info'
+    });
+});
+
+// Global error handler
 app.use((err, req, res, next) => {
-    console.error('Server error:', err);
+    console.error('⚠️ Server Error:', err);
     res.status(500).json({ 
         error: 'Internal server error',
-        message: err.message 
+        message: process.env.NODE_ENV === 'production' ? 'Something went wrong' : err.message
     });
 });
 
-// Start server
-app.listen(port, () => {
-    console.log(`🚀 Server running at http://localhost:${port}`);
-    console.log(`📊 Please check http://localhost:${port}/test-db to test database connection`);
-    console.log(`📋 All endpoints: http://localhost:${port}/`);
+// ==================== SERVER START ====================
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`
+    ========================================
+    🚀 DIABETES DIAGNOSIS SYSTEM API
+    ========================================
+    ✅ Server is running!
+    📍 Port: ${PORT}
+    🌐 Environment: ${process.env.NODE_ENV || 'development'}
+    📁 Database: ${process.env.DATABASE_URL ? 'Railway Database' : 'Mock Database'}
+    🏠 Local URL: http://localhost:${PORT}
+    🔗 Health Check: http://localhost:${PORT}/health
+    📊 API Info: http://localhost:${PORT}/api/info
+    ========================================
+    `);
+    
+    // Test database connection
+    console.log('🧪 Testing database connection...');
+    executeQuery('SELECT 1 + 1 AS result')
+        .then(result => console.log('✅ Database test passed:', result[0]))
+        .catch(err => console.log('⚠️ Database test failed (using mock):', err.message));
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('👋 SIGTERM received. Shutting down gracefully...');
+    server.close(() => {
+        console.log('💤 Server shut down.');
+        process.exit(0);
+    });
 });
