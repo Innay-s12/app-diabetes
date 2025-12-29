@@ -241,350 +241,78 @@
         </div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🔐 Login page loaded');
+    <!-- login.html -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm') || document.querySelector('form');
+    const usernameInput = document.querySelector('input[name="username"], input[type="text"]');
+    const passwordInput = document.querySelector('input[name="password"], input[type="password"]');
+    const loginBtn = document.getElementById('loginBtn') || document.querySelector('button[type="submit"]');
+    
+    async function handleLogin(event) {
+        event.preventDefault();
         
-        // Check existing session
-        checkExistingSession();
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
         
-        // Setup event listeners
-        setupEventListeners();
-    });
-
-    function checkExistingSession() {
-        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-        const loginTime = sessionStorage.getItem('loginTime');
-        const authToken = sessionStorage.getItem('authToken');
+        if (!username || !password) {
+            alert('Harap isi nama admin dan kata sandi');
+            return;
+        }
         
-        if (isLoggedIn === 'true' && loginTime && authToken) {
-            const currentTime = Date.now();
-            const sessionAge = currentTime - parseInt(loginTime);
-            const twentyFourHours = 24 * 60 * 60 * 1000;
+        // Disable button dan tampilkan loading
+        if (loginBtn) {
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span>Memproses...</span>';
+        }
+        
+        try {
+            const data = await API_CONFIG.fetchApi(API_CONFIG.ENDPOINTS.ADMIN_LOGIN, {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: username,
+                    sandi: parseInt(password) // Convert to number
+                })
+            });
             
-            if (sessionAge < twentyFourHours) {
-                console.log('✅ Valid session found, redirecting...');
-                window.location.href = 'admin.html';
-                return;
+            if (data.success) {
+                // Simpan session
+                localStorage.setItem('adminLoggedIn', 'true');
+                localStorage.setItem('adminName', data.admin?.name || username);
+                
+                // Redirect ke admin dashboard
+                window.location.href = '/admin';
             } else {
-                console.log('⚠️ Session expired, clearing...');
-                sessionStorage.clear();
-                showSessionExpiredMessage();
+                alert('Login gagal: ' + (data.error || 'Username atau password salah'));
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+        } finally {
+            // Reset button
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<span>Masuk</span>';
             }
         }
     }
-
-    function showSessionExpiredMessage() {
-        const sandiError = document.getElementById('sandiError');
-        sandiError.textContent = 'Sesi Anda telah berakhir. Silakan login kembali.';
-        sandiError.style.display = 'block';
-        sandiError.style.color = '#f39c12';
-        sandiError.style.backgroundColor = '#fef5e7';
-        sandiError.style.borderLeftColor = '#f39c12';
-    }
-
-    function setupEventListeners() {
-        const loginForm = document.getElementById('loginForm');
-        const sandiInput = document.getElementById('sandi');
-        const namaInput = document.getElementById('nama');
-        const togglePassword = document.getElementById('togglePassword');
-        
-        // Form submission
+    
+    // Attach event listeners
+    if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
-        
-        // Real-time validation for password
-        sandiInput.addEventListener('input', function(e) {
-            this.value = this.value.replace(/\D/g, '').slice(0, 6);
-            clearError('sandiError');
-            updateInputStyle(this, 'sandi');
-        });
-        
-        // Real-time validation for username
-        namaInput.addEventListener('input', function() {
-            clearError('namaError');
-            updateInputStyle(this, 'nama');
-        });
-        
-        // Toggle password visibility
-        togglePassword.addEventListener('click', function() {
-            const passwordInput = document.getElementById('sandi');
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.textContent = type === 'password' ? 'Lihat' : 'Sembunyikan';
-        });
-        
-        // Focus on username field when page loads
-        namaInput.focus();
-    }
-
-    async function handleLogin(e) {
-    e.preventDefault();
-    
-    const nama = document.getElementById('nama').value.trim();
-    const sandi = document.getElementById('sandi').value.trim();
-    
-    console.log('=== LOGIN ATTEMPT ===');
-    console.log('Username:', nama);
-    console.log('Password:', sandi);
-    console.log('Endpoint: /admin/login');
-    
-    clearAllMessages();
-    resetInputStyles();
-    
-    if (!validateInput(nama, sandi)) {
-        return;
     }
     
-    setLoadingState(true);
-    
-    try {
-        // Test koneksi dulu
-        console.log('🔍 Testing backend connection...');
-        const testResponse = await fetch('http://localhost:8000/');
-        console.log('🌐 Backend status:', testResponse.status);
-        
-        // Lakukan login
-        const result = await authenticateUser(nama, sandi);
-        
-        console.log('🔑 Login result:', result);
-        
-        if (result.success) {
-            // Simpan data session
-            saveSessionData(nama, result.user, result.token);
-            showSuccessMessage();
-            
-            // Redirect ke admin dashboard
-            setTimeout(() => {
-                window.location.href = 'admin.html';
-            }, 1500);
-        } else {
-            // Tampilkan error
-            showError('sandiError', result.message);
-            shakeForm();
-        }
-    } catch (error) {
-        console.error('Login process error:', error);
-        showError('sandiError', 'Error: ' + error.message);
-    } finally {
-        setLoadingState(false);
-    }
-}
-
-    function validateInput(nama, sandi) {
-        let isValid = true;
-        
-        // Validasi username
-        if (!nama) {
-            showError('namaError', 'Nama admin harus diisi');
-            markInputError('nama');
-            isValid = false;
-        } else if (nama.length < 3) {
-            showError('namaError', 'Nama admin minimal 3 karakter');
-            markInputError('nama');
-            isValid = false;
-        }
-        
-        // Validasi password
-        if (!sandi) {
-            showError('sandiError', 'Kata sandi harus diisi');
-            markInputError('sandi');
-            isValid = false;
-        } else if (sandi.length !== 6 || !/^\d+$/.test(sandi)) {
-            showError('sandiError', 'Kata sandi harus 6 digit angka');
-            markInputError('sandi');
-            isValid = false;
-        }
-        
-        return isValid;
-    }
-
-    async function authenticateUser(nama, sandi) {
-    try {
-        const backendUrl = 'http://localhost:8000';
-        const endpoint = '/admin/login'; // <- INI YANG DIPERBAIKI
-        
-        console.log(`🔐 Mengirim POST ke: ${backendUrl}${endpoint}`);
-        console.log(`📤 Data: ${JSON.stringify({ name: nama, sandi: sandi })}`); // Perhatikan field name
-        
-        const response = await fetch(`${backendUrl}${endpoint}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                name: nama,    // Sesuai dengan backend: 'name'
-                sandi: sandi   // Sesuai dengan backend: 'sandi'
-            })
-        });
-        
-        console.log('📥 Response status:', response.status);
-        
-        const result = await response.json();
-        console.log('📦 Response data:', result);
-        
-        if (response.ok) {
-            return {
-                success: true,
-                message: result.message || 'Login berhasil',
-                user: {
-                    id: result.admin?.id || 1,
-                    name: result.admin?.name || nama,
-                    role: 'admin'
-                },
-                // Backend tidak mengembalikan token, jadi kita buat dummy
-                token: 'admin-token-' + Date.now()
-            };
-        } else {
-            return {
-                success: false,
-                message: result.error || `Login gagal (Status: ${response.status})`
-            };
-        }
-        
-    } catch (error) {
-        console.error('❌ Authentication error:', error);
-        
-        return {
-            success: false,
-            message: `Tidak dapat terhubung ke server: ${error.message}`
-        };
-    }
-}
-    function saveSessionData(adminName, userData = null, token = null) {
-    sessionStorage.setItem('isLoggedIn', 'true');
-    sessionStorage.setItem('adminName', adminName);
-    sessionStorage.setItem('loginTime', Date.now().toString());
-    
-    if (userData) {
-        sessionStorage.setItem('adminId', userData.id || '');
-        sessionStorage.setItem('adminFullName', userData.name || adminName);
-        sessionStorage.setItem('adminRole', userData.role || 'admin');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', handleLogin);
     }
     
-    if (token) {
-        sessionStorage.setItem('authToken', token);
-    }
-    
-    console.log('✅ Session saved for admin:', adminName);
-}
-
-    function setLoadingState(isLoading) {
-        const loginButton = document.getElementById('loginButton');
-        const loadingElement = document.getElementById('loading');
-        
-        if (isLoading) {
-            loginButton.disabled = true;
-            loginButton.textContent = 'Memproses...';
-            loadingElement.style.display = 'block';
-        } else {
-            loginButton.disabled = false;
-            loginButton.textContent = 'Masuk';
-            loadingElement.style.display = 'none';
-        }
-    }
-
-    function showError(elementId, message) {
-        const errorElement = document.getElementById(elementId);
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
-    }
-
-    function clearError(elementId) {
-        const errorElement = document.getElementById(elementId);
-        errorElement.style.display = 'none';
-    }
-
-    function clearAllMessages() {
-        const errorMessages = document.querySelectorAll('.error-message');
-        errorMessages.forEach(msg => {
-            msg.style.display = 'none';
-            msg.style.color = '#e74c3c';
-            msg.style.backgroundColor = '#fdf2f2';
-            msg.style.borderLeftColor = '#e74c3c';
-        });
-        document.getElementById('successMessage').style.display = 'none';
-    }
-
-    function showSuccessMessage() {
-        const successMessage = document.getElementById('successMessage');
-        successMessage.style.display = 'block';
-        successMessage.style.animation = 'fadeIn 0.5s';
-    }
-
-    function markInputError(inputId) {
-        const input = document.getElementById(inputId);
-        input.classList.remove('success');
-        input.classList.add('error');
-    }
-
-    function updateInputStyle(input, inputId) {
-        const value = input.value.trim();
-        
-        input.classList.remove('error', 'success');
-        
-        if (value.length > 0) {
-            if (inputId === 'sandi') {
-                if (/^\d{6}$/.test(value)) {
-                    input.classList.add('success');
-                }
-            } else if (inputId === 'nama') {
-                if (value.length >= 3) {
-                    input.classList.add('success');
-                }
-            }
-        }
-    }
-
-    function resetInputStyles() {
-        const inputs = document.querySelectorAll('.form-group input');
-        inputs.forEach(input => {
-            input.classList.remove('error', 'success');
-        });
-    }
-
-    function shakeForm() {
-        const loginContainer = document.querySelector('.login-container');
-        loginContainer.style.animation = 'none';
-        setTimeout(() => {
-            loginContainer.style.animation = 'shake 0.5s';
-        }, 10);
-        
-        // Define shake animation
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                20%, 40%, 60%, 80% { transform: translateX(5px); }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        setTimeout(() => {
-            loginContainer.style.animation = '';
-            style.remove();
-        }, 500);
-    }
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl+Enter to submit form
-        if (e.ctrlKey && e.key === 'Enter') {
-            const loginButton = document.getElementById('loginButton');
-            if (!loginButton.disabled) {
-                loginButton.click();
-            }
-        }
-        
-        // Escape to clear form
-        if (e.key === 'Escape') {
-            document.getElementById('loginForm').reset();
-            clearAllMessages();
-            resetInputStyles();
-            document.getElementById('nama').focus();
+    // Enter key support
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            handleLogin(e);
         }
     });
-    </script>
+});
+</script>
 </body>
 </html>
