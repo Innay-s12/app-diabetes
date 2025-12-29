@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data gejala Users - Sistem Diabetes</title>
+    <title>Data Penyakit - Sistem Diabetes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="config.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -457,98 +457,41 @@
             gap: 10px;
         }
 
-        /* ===== USER SYMPTOM CARDS ===== */
-        .symptom-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+        /* ===== FORM STYLES ===== */
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        .symptom-card {
-            background: var(--white);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--primary);
-            transition: all 0.3s ease;
-        }
-
-        .symptom-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .symptom-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .user-display-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: white;
-        }
-
-        .user-details h4 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: var(--dark);
-        }
-
-        .user-meta {
-            font-size: 0.8rem;
-            color: var(--gray-dark);
-        }
-
-        .symptom-list {
-            margin: 15px 0;
-        }
-
-        .symptom-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 6px;
+        .form-label {
+            display: block;
             margin-bottom: 8px;
-        }
-
-        .symptom-name {
             font-weight: 500;
             color: var(--dark);
         }
 
-        .symptom-meta {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            transition: border-color 0.3s;
         }
 
-        .symptom-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 15px;
-            border-top: 1px solid var(--gray);
-            font-size: 0.8rem;
-            color: var(--gray-dark);
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
         /* ===== MODAL STYLES ===== */
@@ -574,7 +517,7 @@
             border-radius: 8px;
             box-shadow: var(--shadow);
             width: 90%;
-            max-width: 700px;
+            max-width: 800px;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -662,13 +605,8 @@
                 flex-direction: column;
             }
             
-            .symptom-grid {
+            .form-row {
                 grid-template-columns: 1fr;
-            }
-            
-            .symptom-header {
-                flex-direction: column;
-                gap: 10px;
             }
         }
     </style>
@@ -691,11 +629,14 @@
                 <a href="diagnoses.html" class="menu-item">
                     <i class="fas fa-file-medical"></i> Data Diagnosa
                 </a>
-                <a href="user_symptoms.html" class="menu-item active">
+                <a href="user_symptoms.html" class="menu-item">
                     <i class="fas fa-user-md"></i> Gejala Pengguna
                 </a>
                 <a href="gejala.html" class="menu-item">
                     <i class="fas fa-clipboard-list"></i> Data Gejala
+                </a>
+                <a href="diseases.html" class="menu-item active">
+                    <i class="fas fa-disease"></i> Data Penyakit
                 </a>
                 <a href="recommendations.html" class="menu-item">
                     <i class="fas fa-lightbulb"></i> Rekomendasi
@@ -707,7 +648,7 @@
         <div class="main-content">
             <!-- Topbar -->
             <div class="topbar">
-                <h1>Gejala Pengguna</h1>
+                <h1>Data Penyakit</h1>
                 <div class="topbar-user-info">
                     <div class="user-info">
                     <div id="userAvatar" style="width: 40px; height: 40px; border-radius: 50%; background: #e3f2fd; 
@@ -732,31 +673,31 @@
                 <div class="stats-grid">
                     <div class="stat-card" style="border-left-color: var(--primary);">
                         <div class="stat-icon" style="background: #e3f2fd; color: var(--primary);">
-                            <i class="fas fa-user-md"></i>
+                            <i class="fas fa-disease"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="totalUserSymptoms">-</h3>
-                            <p>Total Gejala Pengguna</p>
+                            <h3 id="totalDiseases">-</h3>
+                            <p>Total Penyakit</p>
                         </div>
                     </div>
                     
                     <div class="stat-card" style="border-left-color: var(--success);">
                         <div class="stat-icon" style="background: #e8f5e9; color: var(--success);">
-                            <i class="fas fa-users"></i>
+                            <i class="fas fa-file-medical"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="totalUsers">-</h3>
-                            <p>Pengguna dengan Gejala</p>
+                            <h3 id="totalDiagnoses">-</h3>
+                            <p>Diagnosa Terkait</p>
                         </div>
                     </div>
                     
                     <div class="stat-card" style="border-left-color: var(--warning);">
                         <div class="stat-icon" style="background: #fff3e0; color: var(--warning);">
-                            <i class="fas fa-clipboard-list"></i>
+                            <i class="fas fa-cogs"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="totalSymptoms">-</h3>
-                            <p>Jenis Gejala Terdaftar</p>
+                            <h3 id="totalRules">-</h3>
+                            <p>Rules Terkait</p>
                         </div>
                     </div>
                     
@@ -765,8 +706,8 @@
                             <i class="fas fa-exclamation-triangle"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="highSeverityCount">-</h3>
-                            <p>Gejala Berat</p>
+                            <h3 id="severeDiseases">-</h3>
+                            <p>Penyakit Berat</p>
                         </div>
                     </div>
                 </div>
@@ -774,11 +715,15 @@
                 <!-- Main Table Card -->
                 <div class="card">
                     <div class="card-header">
-                        <h3>Daftar Gejala Pengguna</h3>
+                        <h3>Daftar Penyakit</h3>
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <button onclick="loadUserSymptomsData()" class="btn btn-primary">
+                            <button onclick="loadDiseasesData()" class="btn btn-primary">
                                 <i class="fas fa-sync-alt"></i>
                                 Refresh
+                            </button>
+                            <button onclick="showAddModal()" class="btn btn-success">
+                                <i class="fas fa-plus"></i>
+                                Tambah Penyakit
                             </button>
                         </div>
                     </div>
@@ -787,15 +732,17 @@
                         <div class="filters-container">
                             <div class="search-box">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="searchInput" placeholder="Cari nama pengguna atau gejala..." oninput="applyFilters()">
+                                <input type="text" id="searchInput" placeholder="Cari nama penyakit atau kode..." oninput="applyFilters()">
                             </div>
                             <div class="filter-group">
-                                <select id="userFilter" onchange="applyFilters()">
-                                    <option value="">Semua Pengguna</option>
-                                    <!-- Options will be populated by JavaScript -->
+                                <select id="typeFilter" onchange="applyFilters()">
+                                    <option value="">Semua Tipe</option>
+                                    <option value="Diabetes">Diabetes</option>
+                                    <option value="Komplikasi">Komplikasi</option>
+                                    <option value="Lainnya">Lainnya</option>
                                 </select>
                                 <select id="severityFilter" onchange="applyFilters()">
-                                    <option value="">Semua Keparahan</option>
+                                    <option value="">Semua Tingkat</option>
                                     <option value="Ringan">Ringan</option>
                                     <option value="Sedang">Sedang</option>
                                     <option value="Berat">Berat</option>
@@ -803,21 +750,21 @@
                             </div>
                         </div>
 
-                        <!-- User Symptoms Table -->
+                        <!-- Diseases Table -->
                         <div class="table-container">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Pengguna</th>
-                                        <th>Gejala</th>
-                                        <th>Keparahan</th>
-                                        <th>Bobot</th>
-                                        <th>Tanggal Input</th>
+                                        <th>Kode</th>
+                                        <th>Nama Penyakit</th>
+                                        <th>Tipe</th>
+                                        <th>Tingkat</th>
+                                        <th>Deskripsi</th>
+                                        <th>Solusi</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody id="userSymptomsTableBody">
+                                <tbody id="diseasesTableBody">
                                     <!-- Data akan diisi oleh JavaScript -->
                                 </tbody>
                             </table>
@@ -826,22 +773,22 @@
                         <!-- Loading State -->
                         <div id="loadingState" class="loading-state">
                             <div class="spinner"></div>
-                            <p>Memuat data gejala pengguna...</p>
+                            <p>Memuat data penyakit...</p>
                         </div>
                         
                         <!-- Empty State -->
                         <div id="emptyState" class="empty-state hidden">
-                            <i class="fas fa-user-md"></i>
-                            <h3>Tidak ada data gejala</h3>
-                            <p>Belum ada gejala yang dipilih oleh pengguna.</p>
+                            <i class="fas fa-disease"></i>
+                            <h3>Tidak ada data penyakit</h3>
+                            <p>Belum ada penyakit yang terdaftar.</p>
                         </div>
                         
                         <!-- Error State -->
                         <div id="errorState" class="error-state hidden">
                             <i class="fas fa-exclamation-triangle"></i>
                             <h3>Gagal memuat data</h3>
-                            <p>Terjadi kesalahan saat mengambil data gejala pengguna.</p>
-                            <button onclick="loadUserSymptomsData()" class="btn btn-primary" style="margin-top: 15px;">
+                            <p>Terjadi kesalahan saat mengambil data penyakit.</p>
+                            <button onclick="loadDiseasesData()" class="btn btn-primary" style="margin-top: 15px;">
                                 <i class="fas fa-redo-alt"></i>
                                 Coba Lagi
                             </button>
@@ -861,27 +808,85 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- User Symptoms Grid View -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Detail Gejala Pengguna (Grouped by User)</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="symptom-grid" id="userSymptomsGrid">
-                            <!-- Data grid akan diisi oleh JavaScript -->
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal untuk Detail User Symptoms -->
+    <!-- Modal untuk Add/Edit Disease -->
+    <div id="diseaseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="diseaseModalTitle">Tambah Penyakit Baru</h3>
+                <button class="modal-close" onclick="closeDiseaseModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="diseaseForm" onsubmit="saveDisease(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="diseaseCode" class="form-label">Kode Penyakit *</label>
+                            <input type="text" id="diseaseCode" class="form-control" required 
+                                   pattern="[A-Za-z0-9]+" title="Hanya huruf dan angka diperbolehkan">
+                        </div>
+                        <div class="form-group">
+                            <label for="diseaseName" class="form-label">Nama Penyakit *</label>
+                            <input type="text" id="diseaseName" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="diseaseType" class="form-label">Tipe Penyakit *</label>
+                            <select id="diseaseType" class="form-control" required>
+                                <option value="">Pilih Tipe</option>
+                                <option value="Diabetes">Diabetes</option>
+                                <option value="Komplikasi">Komplikasi</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="diseaseSeverity" class="form-label">Tingkat Keparahan *</label>
+                            <select id="diseaseSeverity" class="form-control" required>
+                                <option value="">Pilih Tingkat</option>
+                                <option value="Ringan">Ringan</option>
+                                <option value="Sedang">Sedang</option>
+                                <option value="Berat">Berat</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="diseaseDescription" class="form-label">Deskripsi *</label>
+                        <textarea id="diseaseDescription" class="form-control form-textarea" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="diseaseSolution" class="form-label">Solusi/Rekomendasi *</label>
+                        <textarea id="diseaseSolution" class="form-control form-textarea" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="diseaseNotes" class="form-label">Catatan Tambahan</label>
+                        <textarea id="diseaseNotes" class="form-control form-textarea"></textarea>
+                    </div>
+                    
+                    <input type="hidden" id="diseaseId">
+                    
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn" onclick="closeDiseaseModal()">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal untuk Detail Disease -->
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="detailModalTitle">Detail Gejala Pengguna</h3>
+                <h3 id="detailModalTitle">Detail Penyakit</h3>
                 <button class="modal-close" onclick="closeDetailModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -900,7 +905,7 @@
                 <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <p id="deleteMessage">Apakah Anda yakin ingin menghapus gejala ini?</p>
+                <p id="deleteMessage">Apakah Anda yakin ingin menghapus penyakit ini?</p>
                 <p style="color: var(--danger); font-size: 0.9rem; margin-top: 10px;">
                     <i class="fas fa-exclamation-triangle"></i>
                     Tindakan ini tidak dapat dibatalkan!
@@ -963,42 +968,35 @@
         }
 
         // =============================
-        // ✅ Konfigurasi API - SESUAI DENGAN SERVER.JS
+        // ✅ Konfigurasi API - Menggunakan dari config.js
         // =============================
-        const API_BASE_URL = "http://localhost:8000";
+        const API_BASE_URL = window.API_BASE_URL || "http://localhost:8000";
 
         // =============================
-        // 🔹 Service untuk mengelola user symptoms
+        // 🔹 Service untuk mengelola penyakit
         // =============================
-        class UserSymptomService {
-            static async getUserSymptoms(userId = null) {
+        class DiseaseService {
+            static async getDiseases() {
                 try {
-                    let url = `${API_BASE_URL}/user_symptoms`;
-                    if (userId) {
-                        // Menggunakan endpoint yang ada di server.js: /user/:id/symptoms
-                        url = `${API_BASE_URL}/user/${userId}/symptoms`;
-                    }
-                    
-                    console.log('📡 Fetching user symptoms from:', url);
-                    const response = await fetch(url);
+                    console.log('📡 Fetching diseases from:', `${API_BASE_URL}/diseases`);
+                    const response = await fetch(`${API_BASE_URL}/diseases`);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     
                     const data = await response.json();
-                    console.log('✅ User symptoms data received:', data);
+                    console.log('✅ Diseases data received:', data);
                     return data;
                 } catch (error) {
-                    console.error('❌ Error fetching user symptoms:', error);
+                    console.error('❌ Error fetching diseases:', error);
                     throw error;
                 }
             }
 
-            static async getUsers() {
+            static async getDiseaseById(id) {
                 try {
-                    console.log('📡 Fetching users from:', `${API_BASE_URL}/users`);
-                    const response = await fetch(`${API_BASE_URL}/users`);
+                    const response = await fetch(`${API_BASE_URL}/disease/${id}`);
                     
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -1006,38 +1004,19 @@
                     
                     return await response.json();
                 } catch (error) {
-                    console.error('❌ Error fetching users:', error);
+                    console.error('❌ Error fetching disease:', error);
                     throw error;
                 }
             }
 
-            static async getSymptoms() {
+            static async create(disease) {
                 try {
-                    console.log('📡 Fetching symptoms from:', `${API_BASE_URL}/symptoms`);
-                    const response = await fetch(`${API_BASE_URL}/symptoms`);
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    return await response.json();
-                } catch (error) {
-                    console.error('❌ Error fetching symptoms:', error);
-                    throw error;
-                }
-            }
-
-            static async delete(id) {
-                try {
-                    console.log('📡 Deleting user symptom:', `${API_BASE_URL}/user-symptoms/${id}`);
-                    // Note: Endpoint di server.js adalah POST /user-symptoms untuk create
-                    // Untuk delete, kita bisa gunakan endpoint yang sama dengan method DELETE
-                    const response = await fetch(`${API_BASE_URL}/user-symptoms`, {
-                        method: 'DELETE',
+                    const response = await fetch(`${API_BASE_URL}/disease`, {
+                        method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ id })
+                        body: JSON.stringify(disease)
                     });
                     
                     if (!response.ok) {
@@ -1047,8 +1026,80 @@
                     
                     return await response.json();
                 } catch (error) {
-                    console.error('❌ Error deleting user symptom:', error);
+                    console.error('❌ Error creating disease:', error);
                     throw error;
+                }
+            }
+
+            static async update(id, disease) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/disease/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(disease)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('❌ Error updating disease:', error);
+                    throw error;
+                }
+            }
+
+            static async delete(id) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/disease/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('❌ Error deleting disease:', error);
+                    throw error;
+                }
+            }
+
+            static async getDiagnosesCount() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/diagnoses`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    return data.length || 0;
+                } catch (error) {
+                    console.error('❌ Error fetching diagnoses count:', error);
+                    return 0;
+                }
+            }
+
+            static async getRulesCount() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/rules`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    return data.length || 0;
+                } catch (error) {
+                    console.error('❌ Error fetching rules count:', error);
+                    return 0;
                 }
             }
         }
@@ -1107,12 +1158,10 @@
         // =============================
         // 🔹 State Management
         // =============================
-        let userSymptomsData = [];
-        let filteredUserSymptoms = [];
-        let usersData = [];
-        let symptomsData = [];
+        let diseasesData = [];
+        let filteredDiseases = [];
         let currentPage = 1;
-        const userSymptomsPerPage = 10;
+        const diseasesPerPage = 10;
 
         // =============================
         // 🔹 UI Controller
@@ -1122,8 +1171,7 @@
                 document.getElementById('loadingState').classList.remove('hidden');
                 document.getElementById('emptyState').classList.add('hidden');
                 document.getElementById('errorState').classList.add('hidden');
-                document.getElementById('userSymptomsTableBody').innerHTML = '';
-                document.getElementById('userSymptomsGrid').innerHTML = '';
+                document.getElementById('diseasesTableBody').innerHTML = '';
             }
             
             static hideLoading() {
@@ -1192,6 +1240,12 @@
                 });
                 
                 // Close modal ketika klik di luar modal
+                document.getElementById('diseaseModal').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeDiseaseModal();
+                    }
+                });
+                
                 document.getElementById('detailModal').addEventListener('click', function(e) {
                     if (e.target === this) {
                         closeDetailModal();
@@ -1213,64 +1267,30 @@
         }
 
         // =============================
-        // 🔹 Ambil data user symptoms dari API
+        // 🔹 Ambil data penyakit dari API
         // =============================
-        async function loadUserSymptomsData() {
+        async function loadDiseasesData() {
             UIController.showLoading();
             
             try {
-                // Load semua data yang diperlukan
-                const [users, symptoms] = await Promise.all([
-                    UserSymptomService.getUsers().catch(err => {
-                        console.error('Error in users fetch:', err);
-                        throw err;
-                    }),
-                    UserSymptomService.getSymptoms().catch(err => {
-                        console.error('Error in symptoms fetch:', err);
-                        throw err;
-                    })
-                ]);
-                
-                usersData = users;
-                symptomsData = symptoms;
-                
-                // Untuk setiap user, ambil gejala mereka
-                const userSymptomsPromises = usersData.map(async (user) => {
-                    try {
-                        const symptoms = await UserSymptomService.getUserSymptoms(user.id);
-                        return symptoms.map(symptom => ({
-                            ...symptom,
-                            user_id: user.id,
-                            user_name: user.nama_lengkap,
-                            user_age: user.usia,
-                            user_gender: user.jenis_kelamin
-                        }));
-                    } catch (error) {
-                        console.error(`Error fetching symptoms for user ${user.id}:`, error);
-                        return [];
-                    }
-                });
-                
-                const userSymptomsArrays = await Promise.all(userSymptomsPromises);
-                userSymptomsData = userSymptomsArrays.flat();
-                filteredUserSymptoms = [...userSymptomsData];
+                // Load diseases data
+                diseasesData = await DiseaseService.getDiseases();
+                filteredDiseases = [...diseasesData];
                 
                 UIController.hideLoading();
                 
-                if (!userSymptomsData || userSymptomsData.length === 0) {
+                if (!diseasesData || diseasesData.length === 0) {
                     UIController.showEmptyState();
                     updateStatistics();
                     return;
                 }
 
                 updateStatistics();
-                updateUserFilter();
-                renderUserSymptomsTable();
-                renderUserSymptomsGrid();
-                UIController.showMessage(`Berhasil memuat ${userSymptomsData.length} gejala dari ${usersData.length} pengguna`, 'success');
+                renderDiseasesTable();
+                UIController.showMessage(`Berhasil memuat ${diseasesData.length} penyakit`, 'success');
                 
             } catch (err) {
-                console.error('❌ Error loading user symptoms:', err);
+                console.error('❌ Error loading diseases:', err);
                 UIController.hideLoading();
                 UIController.showErrorState();
                 UIController.showMessage(`Gagal memuat data: ${err.message}`, 'error');
@@ -1280,49 +1300,36 @@
         // =============================
         // 🔹 Update statistics cards
         // =============================
-        function updateStatistics() {
-            const totalUserSymptoms = userSymptomsData.length;
-            const totalUsers = new Set(userSymptomsData.map(us => us.user_id)).size;
-            const totalSymptoms = new Set(userSymptomsData.map(us => us.symptom_id || us.id)).size;
+        async function updateStatistics() {
+            const totalDiseases = diseasesData.length;
             
-            // Hitung gejala dengan tingkat keparahan tinggi/berat
-            const highSeverityCount = userSymptomsData.filter(us => {
-                return us.tingkat_keparahan === 'Berat' || us.tingkat_keparahan === 'Tinggi';
+            // Load additional statistics
+            const totalDiagnoses = await DiseaseService.getDiagnosesCount();
+            const totalRules = await DiseaseService.getRulesCount();
+            
+            // Hitung penyakit dengan tingkat keparahan berat
+            const severeDiseases = diseasesData.filter(d => {
+                return d.tingkat_keparahan === 'Berat' || d.tingkat_keparahan === 'Tinggi';
             }).length;
 
-            document.getElementById('totalUserSymptoms').textContent = totalUserSymptoms;
-            document.getElementById('totalUsers').textContent = totalUsers;
-            document.getElementById('totalSymptoms').textContent = totalSymptoms;
-            document.getElementById('highSeverityCount').textContent = highSeverityCount;
-        }
-
-        // =============================
-        // 🔹 Update user filter dropdown
-        // =============================
-        function updateUserFilter() {
-            const userFilter = document.getElementById('userFilter');
-            const uniqueUsers = [...new Set(userSymptomsData.map(us => us.user_id))];
-            
-            // Clear existing options except the first one
-            while (userFilter.options.length > 1) {
-                userFilter.remove(1);
-            }
-            
-            // Add user options
-            uniqueUsers.forEach(userId => {
-                const user = usersData.find(u => u.id === userId);
-                if (user) {
-                    const option = document.createElement('option');
-                    option.value = userId;
-                    option.textContent = `${user.nama_lengkap} (ID: ${user.id})`;
-                    userFilter.appendChild(option);
-                }
-            });
+            document.getElementById('totalDiseases').textContent = totalDiseases;
+            document.getElementById('totalDiagnoses').textContent = totalDiagnoses;
+            document.getElementById('totalRules').textContent = totalRules;
+            document.getElementById('severeDiseases').textContent = severeDiseases;
         }
 
         // =============================
         // 🔹 Helper functions untuk styling
         // =============================
+        function getTypeBadgeClass(type) {
+            switch(type?.toLowerCase()) {
+                case 'diabetes': return 'badge-success';
+                case 'komplikasi': return 'badge-warning';
+                case 'lainnya': return 'badge-info';
+                default: return 'badge-info';
+            }
+        }
+
         function getSeverityBadgeClass(severity) {
             switch(severity?.toLowerCase()) {
                 case 'ringan': return 'badge-success';
@@ -1332,24 +1339,295 @@
             }
         }
 
-        function getUserAvatarColor(name) {
-            const colors = [
-                { bg: '#e3f2fd', color: '#1565c0' }, // Blue
-                { bg: '#f3e5f5', color: '#7b1fa2' }, // Purple
-                { bg: '#e8f5e9', color: '#2e7d32' }, // Green
-                { bg: '#ffebee', color: '#c62828' }, // Red
-                { bg: '#fff3e0', color: '#ef6c00' }  // Orange
-            ];
-            if (!name) return colors[0];
-            const index = name.length % colors.length;
-            return colors[index];
+        // =============================
+        // 🔹 Render table view
+        // =============================
+        function renderDiseasesTable() {
+            const tableBody = document.getElementById('diseasesTableBody');
+            
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * diseasesPerPage;
+            const endIndex = startIndex + diseasesPerPage;
+            const diseasesToShow = filteredDiseases.slice(startIndex, endIndex);
+            
+            if (diseasesToShow.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="padding: 40px; color: var(--gray-dark); text-align: center;">
+                            <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                            Tidak ada data penyakit yang sesuai dengan filter
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tableBody.innerHTML = diseasesToShow
+                    .map(disease => {
+                        const description = disease.deskripsi || '';
+                        const solution = disease.solusi || '';
+                        
+                        return `
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 500; color: var(--primary);">${disease.kode}</div>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 500; color: var(--dark);">${disease.nama}</div>
+                                </td>
+                                <td>
+                                    <span class="badge ${getTypeBadgeClass(disease.tipe)}">
+                                        ${disease.tipe || '-'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge ${getSeverityBadgeClass(disease.tingkat_keparahan)}">
+                                        ${disease.tingkat_keparahan || '-'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        ${description}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        ${solution}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button onclick="viewDiseaseDetail(${disease.id})" class="btn btn-primary btn-sm" title="Lihat Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button onclick="editDisease(${disease.id})" class="btn btn-warning btn-sm" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="deleteDisease(${disease.id}, '${disease.nama}')" class="btn btn-danger btn-sm" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+            }
+            
+            // Update pagination info
+            updatePaginationInfo();
         }
 
-        function getUserInitial(name) {
-            if (!name) return '?';
-            const names = name.split(' ');
-            if (names.length === 1) return names[0].charAt(0).toUpperCase();
-            return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+        // =============================
+        // 🔹 Update informasi pagination
+        // =============================
+        function updatePaginationInfo() {
+            const totalPages = Math.ceil(filteredDiseases.length / diseasesPerPage);
+            document.getElementById('pageInfo').textContent = `Halaman ${currentPage} dari ${totalPages}`;
+            
+            // Disable/enable pagination buttons
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // =============================
+        // 🔹 Filter data penyakit
+        // =============================
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const typeValue = document.getElementById('typeFilter').value;
+            const severityValue = document.getElementById('severityFilter').value;
+            
+            filteredDiseases = diseasesData.filter(disease => {
+                const diseaseName = (disease.nama || '').toLowerCase();
+                const diseaseCode = (disease.kode || '').toLowerCase();
+                const diseaseType = disease.tipe;
+                const diseaseSeverity = disease.tingkat_keparahan;
+                
+                const matchesSearch = diseaseName.includes(searchTerm) || diseaseCode.includes(searchTerm);
+                const matchesType = !typeValue || diseaseType === typeValue;
+                const matchesSeverity = !severityValue || diseaseSeverity === severityValue;
+                
+                return matchesSearch && matchesType && matchesSeverity;
+            });
+            
+            currentPage = 1;
+            renderDiseasesTable();
+        }
+
+        // =============================
+        // 🔹 Reset filter
+        // =============================
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('severityFilter').value = '';
+            filteredDiseases = [...diseasesData];
+            currentPage = 1;
+            renderDiseasesTable();
+            UIController.showMessage('Filter telah direset', 'info');
+        }
+
+        // =============================
+        // 🔹 Pagination functions
+        // =============================
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderDiseasesTable();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredDiseases.length / diseasesPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderDiseasesTable();
+            }
+        }
+
+        // =============================
+        // 🔹 Show Add Disease Modal
+        // =============================
+        function showAddModal() {
+            document.getElementById('diseaseModalTitle').textContent = 'Tambah Penyakit Baru';
+            document.getElementById('diseaseForm').reset();
+            document.getElementById('diseaseId').value = '';
+            document.getElementById('diseaseModal').classList.add('show');
+        }
+
+        // =============================
+        // 🔹 Close Disease Modal
+        // =============================
+        function closeDiseaseModal() {
+            document.getElementById('diseaseModal').classList.remove('show');
+            document.getElementById('diseaseForm').reset();
+        }
+
+        // =============================
+        // 🔹 Edit Disease
+        // =============================
+        async function editDisease(id) {
+            try {
+                const disease = await DiseaseService.getDiseaseById(id);
+                
+                document.getElementById('diseaseModalTitle').textContent = 'Edit Penyakit';
+                document.getElementById('diseaseId').value = disease.id;
+                document.getElementById('diseaseCode').value = disease.kode;
+                document.getElementById('diseaseName').value = disease.nama;
+                document.getElementById('diseaseType').value = disease.tipe;
+                document.getElementById('diseaseSeverity').value = disease.tingkat_keparahan;
+                document.getElementById('diseaseDescription').value = disease.deskripsi || '';
+                document.getElementById('diseaseSolution').value = disease.solusi || '';
+                document.getElementById('diseaseNotes').value = disease.catatan || '';
+                
+                document.getElementById('diseaseModal').classList.add('show');
+                
+            } catch (error) {
+                console.error('❌ Error loading disease:', error);
+                UIController.showMessage('Gagal memuat data penyakit', 'error');
+            }
+        }
+
+        // =============================
+        // 🔹 Save Disease (Create/Update)
+        // =============================
+        async function saveDisease(event) {
+            event.preventDefault();
+            
+            const diseaseId = document.getElementById('diseaseId').value;
+            const diseaseData = {
+                kode: document.getElementById('diseaseCode').value,
+                nama: document.getElementById('diseaseName').value,
+                tipe: document.getElementById('diseaseType').value,
+                tingkat_keparahan: document.getElementById('diseaseSeverity').value,
+                deskripsi: document.getElementById('diseaseDescription').value,
+                solusi: document.getElementById('diseaseSolution').value,
+                catatan: document.getElementById('diseaseNotes').value
+            };
+            
+            try {
+                if (diseaseId) {
+                    // Update existing disease
+                    await DiseaseService.update(diseaseId, diseaseData);
+                    Toast.show('Penyakit berhasil diperbarui!', 'success');
+                } else {
+                    // Create new disease
+                    await DiseaseService.create(diseaseData);
+                    Toast.show('Penyakit berhasil ditambahkan!', 'success');
+                }
+                
+                closeDiseaseModal();
+                loadDiseasesData();
+                
+            } catch (error) {
+                console.error('❌ Error saving disease:', error);
+                Toast.show(`Gagal menyimpan penyakit: ${error.message}`, 'error');
+            }
+        }
+
+        // =============================
+        // 🔹 View disease detail
+        // =============================
+        async function viewDiseaseDetail(id) {
+            try {
+                const disease = await DiseaseService.getDiseaseById(id);
+                
+                document.getElementById('detailModalTitle').textContent = `Detail: ${disease.nama}`;
+                
+                document.getElementById('detailContent').innerHTML = `
+                    <div style="display: grid; gap: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid var(--primary);">
+                                    <h4 style="margin-bottom: 15px; color: var(--primary);">Informasi Dasar</h4>
+                                    <p><strong>Kode:</strong> ${disease.kode}</p>
+                                    <p><strong>Nama Penyakit:</strong> ${disease.nama}</p>
+                                    <p><strong>Tipe:</strong> 
+                                        <span class="badge ${getTypeBadgeClass(disease.tipe)}">
+                                            ${disease.tipe || '-'}
+                                        </span>
+                                    </p>
+                                    <p><strong>Tingkat Keparahan:</strong> 
+                                        <span class="badge ${getSeverityBadgeClass(disease.tingkat_keparahan)}">
+                                            ${disease.tingkat_keparahan || '-'}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div style="background: #fff3e0; padding: 20px; border-radius: 8px; border-left: 4px solid var(--warning);">
+                                    <h4 style="margin-bottom: 15px; color: var(--warning);">Metadata</h4>
+                                    <p><strong>ID:</strong> ${disease.id}</p>
+                                    <p><strong>Tanggal Dibuat:</strong> ${formatDate(disease.created_at)}</p>
+                                    <p><strong>Tanggal Diupdate:</strong> ${formatDate(disease.updated_at)}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 10px; color: var(--primary);">Deskripsi</h4>
+                            <p style="white-space: pre-line;">${disease.deskripsi || '-'}</p>
+                        </div>
+                        
+                        <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 4px solid var(--success);">
+                            <h4 style="margin-bottom: 10px; color: var(--success);">Solusi/Rekomendasi</h4>
+                            <p style="white-space: pre-line;">${disease.solusi || '-'}</p>
+                        </div>
+                        
+                        ${disease.catatan ? `
+                            <div style="background: #f3e5f5; padding: 20px; border-radius: 8px;">
+                                <h4 style="margin-bottom: 10px; color: #7b1fa2;">Catatan Tambahan</h4>
+                                <p style="white-space: pre-line;">${disease.catatan}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                document.getElementById('detailModal').classList.add('show');
+                
+            } catch (error) {
+                console.error('❌ Error loading disease:', error);
+                UIController.showMessage('Gagal memuat detail penyakit', 'error');
+            }
         }
 
         // =============================
@@ -1368,349 +1646,6 @@
         }
 
         // =============================
-        // 🔹 Render table view
-        // =============================
-        function renderUserSymptomsTable() {
-            const tableBody = document.getElementById('userSymptomsTableBody');
-            
-            // Calculate pagination
-            const startIndex = (currentPage - 1) * userSymptomsPerPage;
-            const endIndex = startIndex + userSymptomsPerPage;
-            const userSymptomsToShow = filteredUserSymptoms.slice(startIndex, endIndex);
-            
-            if (userSymptomsToShow.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" style="padding: 40px; color: var(--gray-dark); text-align: center;">
-                            <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                            Tidak ada data gejala yang sesuai dengan filter
-                        </td>
-                    </tr>
-                `;
-            } else {
-                tableBody.innerHTML = userSymptomsToShow
-                    .map(userSymptom => {
-                        const avatarColors = getUserAvatarColor(userSymptom.user_name);
-                        
-                        return `
-                            <tr>
-                                <td>
-                                    <div style="font-weight: 500; color: var(--primary);">${userSymptom.id}</div>
-                                </td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <div style="width: 32px; height: 32px; background: ${avatarColors.bg}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; color: ${avatarColors.color};">
-                                            ${getUserInitial(userSymptom.user_name)}
-                                        </div>
-                                        <div>
-                                            <div style="font-weight: 500;">${userSymptom.user_name || 'Unknown'}</div>
-                                            <div style="font-size: 0.8rem; color: var(--gray-dark);">ID: ${userSymptom.user_id}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <div style="font-weight: 500;">${userSymptom.nama_gejala || userSymptom.kode_gejala || 'Unknown'}</div>
-                                        <div style="font-size: 0.8rem; color: var(--gray-dark);">${userSymptom.kode_gejala || ''}</div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge ${getSeverityBadgeClass(userSymptom.tingkat_keparahan)}">
-                                        ${userSymptom.tingkat_keparahan || '-'}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div style="font-weight: 500; color: var(--primary);">
-                                        ${userSymptom.bobot || '0'}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="color: var(--gray-dark); font-size: 0.9rem;">
-                                        ${formatDate(userSymptom.created_at)}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="btn-group">
-                                        <button onclick="viewUserSymptomDetail(${userSymptom.id})" class="btn btn-primary btn-sm" title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button onclick="deleteUserSymptom(${userSymptom.id}, '${userSymptom.user_name}')" class="btn btn-danger btn-sm" title="Hapus">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('');
-            }
-            
-            // Update pagination info
-            updatePaginationInfo();
-        }
-
-        // =============================
-        // 🔹 Update informasi pagination
-        // =============================
-        function updatePaginationInfo() {
-            const totalPages = Math.ceil(filteredUserSymptoms.length / userSymptomsPerPage);
-            document.getElementById('pageInfo').textContent = `Halaman ${currentPage} dari ${totalPages}`;
-            
-            // Disable/enable pagination buttons
-            document.getElementById('prevBtn').disabled = currentPage === 1;
-            document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
-        }
-
-        // =============================
-        // 🔹 Filter data user symptoms
-        // =============================
-        function applyFilters() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const userValue = document.getElementById('userFilter').value;
-            const severityValue = document.getElementById('severityFilter').value;
-            
-            filteredUserSymptoms = userSymptomsData.filter(userSymptom => {
-                const userName = (userSymptom.user_name || '').toLowerCase();
-                const symptomName = (userSymptom.nama_gejala || '').toLowerCase();
-                const symptomSeverity = userSymptom.tingkat_keparahan;
-                
-                const matchesSearch = userName.includes(searchTerm) || symptomName.includes(searchTerm);
-                const matchesUser = !userValue || userSymptom.user_id == userValue;
-                const matchesSeverity = !severityValue || symptomSeverity === severityValue;
-                
-                return matchesSearch && matchesUser && matchesSeverity;
-            });
-            
-            currentPage = 1;
-            renderUserSymptomsTable();
-            renderUserSymptomsGrid();
-        }
-
-        // =============================
-        // 🔹 Reset filter
-        // =============================
-        function resetFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('userFilter').value = '';
-            document.getElementById('severityFilter').value = '';
-            filteredUserSymptoms = [...userSymptomsData];
-            currentPage = 1;
-            renderUserSymptomsTable();
-            renderUserSymptomsGrid();
-            UIController.showMessage('Filter telah direset', 'info');
-        }
-
-        // =============================
-        // 🔹 Pagination functions
-        // =============================
-        function previousPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                renderUserSymptomsTable();
-            }
-        }
-
-        function nextPage() {
-            const totalPages = Math.ceil(filteredUserSymptoms.length / userSymptomsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderUserSymptomsTable();
-            }
-        }
-
-        // =============================
-        // 🔹 Render grid view (grouped by user)
-        // =============================
-        function renderUserSymptomsGrid() {
-            const gridContainer = document.getElementById('userSymptomsGrid');
-            
-            // Group user symptoms by user
-            const userSymptomsByUser = {};
-            filteredUserSymptoms.forEach(userSymptom => {
-                const userId = userSymptom.user_id;
-                if (!userSymptomsByUser[userId]) {
-                    userSymptomsByUser[userId] = [];
-                }
-                userSymptomsByUser[userId].push(userSymptom);
-            });
-            
-            if (Object.keys(userSymptomsByUser).length === 0) {
-                gridContainer.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--gray-dark);">
-                        <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 15px; display: block; opacity: 0.5;"></i>
-                        <h3>Tidak ada data gejala yang sesuai dengan filter</h3>
-                    </div>
-                `;
-            } else {
-                gridContainer.innerHTML = Object.entries(userSymptomsByUser)
-                    .map(([userId, symptoms]) => {
-                        const user = usersData.find(u => u.id === parseInt(userId));
-                        const avatarColors = getUserAvatarColor(user?.nama_lengkap);
-                        
-                        return `
-                            <div class="symptom-card">
-                                <div class="symptom-header">
-                                    <div class="user-display-info">
-                                        <div class="user-avatar" style="background: ${avatarColors.bg}; color: ${avatarColors.color};">
-                                            ${getUserInitial(user?.nama_lengkap)}
-                                        </div>
-                                        <div class="user-details">
-                                            <h4>${user?.nama_lengkap || 'Unknown User'}</h4>
-                                            <div class="user-meta">
-                                                <span>ID: ${userId}</span>
-                                                <span>•</span>
-                                                <span>${user?.usia || '-'} tahun</span>
-                                                <span>•</span>
-                                                <span>${user?.jenis_kelamin || '-'}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span class="badge badge-info">
-                                        ${symptoms.length} gejala
-                                    </span>
-                                </div>
-                                
-                                <div class="symptom-list">
-                                    ${symptoms.map(symptom => {
-                                        return `
-                                            <div class="symptom-item">
-                                                <div class="symptom-name">
-                                                    ${symptom.nama_gejala || symptom.kode_gejala || 'Unknown Symptom'}
-                                                </div>
-                                                <div class="symptom-meta">
-                                                    <span style="font-size: 0.8rem; color: var(--gray-dark);">
-                                                        Bobot: ${symptom.bobot || '0'}
-                                                    </span>
-                                                    <span class="badge ${getSeverityBadgeClass(symptom.tingkat_keparahan)}">
-                                                        ${symptom.tingkat_keparahan || '-'}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                                
-                                <div class="symptom-footer">
-                                    <span>Terakhir update: ${formatDate(symptoms[0]?.created_at)}</span>
-                                    <button onclick="viewUserSymptoms(${userId})" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-eye"></i> Lihat Detail
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-            }
-        }
-
-        // =============================
-        // 🔹 View user symptom detail
-        // =============================
-        function viewUserSymptomDetail(id) {
-            const userSymptom = userSymptomsData.find(us => us.id === id);
-            if (!userSymptom) {
-                UIController.showMessage('Data gejala tidak ditemukan', 'error');
-                return;
-            }
-
-            document.getElementById('detailModalTitle').textContent = `Detail Gejala #${userSymptom.id}`;
-            
-            document.getElementById('detailContent').innerHTML = `
-                <div style="display: grid; gap: 20px;">
-                    <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid var(--primary);">
-                        <h4 style="margin-bottom: 15px; color: var(--primary);">Informasi Pengguna</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div>
-                                <p><strong>ID Pengguna:</strong> ${userSymptom.user_id}</p>
-                                <p><strong>Nama:</strong> ${userSymptom.user_name || '-'}</p>
-                                <p><strong>Usia:</strong> ${userSymptom.user_age || '-'} tahun</p>
-                            </div>
-                            <div>
-                                <p><strong>Jenis Kelamin:</strong> ${userSymptom.user_gender || '-'}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="background: #fff3e0; padding: 20px; border-radius: 8px; border-left: 4px solid var(--warning);">
-                        <h4 style="margin-bottom: 15px; color: var(--warning);">Informasi Gejala</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div>
-                                <p><strong>Kode Gejala:</strong> ${userSymptom.kode_gejala || '-'}</p>
-                                <p><strong>Nama Gejala:</strong> ${userSymptom.nama_gejala || '-'}</p>
-                                <p><strong>Deskripsi:</strong> ${userSymptom.deskripsi || '-'}</p>
-                            </div>
-                            <div>
-                                <p><strong>Tingkat Keparahan:</strong> 
-                                    <span class="badge ${getSeverityBadgeClass(userSymptom.tingkat_keparahan)}">
-                                        ${userSymptom.tingkat_keparahan || '-'}
-                                    </span>
-                                </p>
-                                <p><strong>Bobot:</strong> ${userSymptom.bobot || '0'}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                        <h4 style="margin-bottom: 10px; color: var(--primary);">Informasi Input</h4>
-                        <p><strong>ID User Symptom:</strong> ${userSymptom.id}</p>
-                        <p><strong>Tanggal Input:</strong> ${formatDate(userSymptom.created_at)}</p>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('detailModal').classList.add('show');
-        }
-
-        // =============================
-        // 🔹 View all symptoms for a user
-        // =============================
-        async function viewUserSymptoms(userId) {
-            try {
-                const userSymptoms = await UserSymptomService.getUserSymptoms(userId);
-                const user = usersData.find(u => u.id === userId);
-                
-                document.getElementById('detailModalTitle').textContent = `Semua Gejala untuk ${user?.nama_lengkap || 'User'}`;
-                
-                const symptomsList = userSymptoms.map(symptom => {
-                    return `
-                        <div class="symptom-item">
-                            <div class="symptom-name">
-                                ${symptom.nama_gejala || symptom.kode_gejala || 'Unknown Symptom'}
-                            </div>
-                            <div class="symptom-meta">
-                                <span style="font-size: 0.8rem; color: var(--gray-dark);">
-                                    Bobot: ${symptom.bobot || '0'}
-                                </span>
-                                <span class="badge ${getSeverityBadgeClass(symptom.tingkat_keparahan)}">
-                                    ${symptom.tingkat_keparahan || '-'}
-                                </span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-                document.getElementById('detailContent').innerHTML = `
-                    <div style="display: grid; gap: 20px;">
-                        <div style="background: #e3f2fd; padding: 20px; border-radius: 8px;">
-                            <h4 style="margin-bottom: 15px; color: var(--primary);">Informasi Pengguna</h4>
-                            <p><strong>Nama:</strong> ${user?.nama_lengkap || '-'}</p>
-                            <p><strong>Total Gejala:</strong> ${userSymptoms.length}</p>
-                        </div>
-                        
-                        <div class="symptom-list">
-                            <h4 style="margin-bottom: 15px; color: var(--primary);">Daftar Gejala</h4>
-                            ${symptomsList}
-                        </div>
-                    </div>
-                `;
-
-                document.getElementById('detailModal').classList.add('show');
-                
-            } catch (error) {
-                console.error('❌ Error loading user symptoms:', error);
-                UIController.showMessage('Gagal memuat gejala pengguna', 'error');
-            }
-        }
-
-        // =============================
         // 🔹 Close detail modal
         // =============================
         function closeDetailModal() {
@@ -1720,14 +1655,14 @@
         // =============================
         // 🔹 Show delete confirmation modal
         // =============================
-        function showDeleteModal(id, userName) {
+        function showDeleteModal(id, diseaseName) {
             document.getElementById('deleteMessage').textContent = 
-                `Apakah Anda yakin ingin menghapus gejala dari pengguna "${userName}"?`;
+                `Apakah Anda yakin ingin menghapus penyakit "${diseaseName}"?`;
             document.getElementById('deleteModal').classList.add('show');
             
             // Setup delete confirmation
             const confirmBtn = document.getElementById('confirmDeleteBtn');
-            confirmBtn.onclick = () => deleteUserSymptomConfirmed(id);
+            confirmBtn.onclick = () => deleteDiseaseConfirmed(id);
         }
 
         function closeDeleteModal() {
@@ -1735,22 +1670,22 @@
         }
 
         // =============================
-        // 🔹 Delete user symptom
+        // 🔹 Delete disease
         // =============================
-        function deleteUserSymptom(id, userName) {
-            showDeleteModal(id, userName);
+        function deleteDisease(id, diseaseName) {
+            showDeleteModal(id, diseaseName);
         }
 
-        async function deleteUserSymptomConfirmed(id) {
+        async function deleteDiseaseConfirmed(id) {
             closeDeleteModal();
             
             try {
-                await UserSymptomService.delete(id);
-                Toast.show('Gejala berhasil dihapus!', 'success');
-                loadUserSymptomsData(); // Reload data
+                await DiseaseService.delete(id);
+                Toast.show('Penyakit berhasil dihapus!', 'success');
+                loadDiseasesData(); // Reload data
             } catch (error) {
-                console.error('❌ Error deleting user symptom:', error);
-                Toast.show(`Gagal menghapus gejala: ${error.message}`, 'error');
+                console.error('❌ Error deleting disease:', error);
+                Toast.show(`Gagal menghapus penyakit: ${error.message}`, 'error');
             }
         }
 
@@ -1758,7 +1693,7 @@
         // 🚀 Initialize application
         // =============================
         function initializePage() {
-            console.log('🎯 Initializing user symptoms page...');
+            console.log('🎯 Initializing diseases page...');
             
             // Check session first
             if (!SessionManager.checkSession()) {
@@ -1772,12 +1707,12 @@
                 initializeDashboard();
                 
                 // Load data
-                loadUserSymptomsData();
+                loadDiseasesData();
                 
-                console.log('🎉 User symptoms page fully initialized');
+                console.log('🎉 Diseases page fully initialized');
                 
             } catch (error) {
-                console.error('❌ Error initializing user symptoms page:', error);
+                console.error('❌ Error initializing diseases page:', error);
                 UIController.showMessage('Terjadi kesalahan saat memuat halaman', 'error');
             }
         }
