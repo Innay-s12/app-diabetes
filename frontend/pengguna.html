@@ -124,23 +124,10 @@
             color: var(--primary);
         }
 
-        .user-info {
+        .topbar-user-info {
             display: flex;
             align-items: center;
-        }
-
-        .btn-logout {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-            margin-left: 15px;
+            gap: 15px;
         }
 
         .content {
@@ -345,102 +332,6 @@
             min-width: 150px;
         }
 
-        /* ===== MODAL STYLES ===== */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: var(--white);
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            padding: 20px;
-            background-color: var(--primary);
-            color: var(--white);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 8px 8px 0 0;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.3rem;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--white);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: var(--dark);
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--gray);
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--gray);
-        }
-
         /* ===== LOADING & STATES ===== */
         .loading-state {
             display: flex;
@@ -483,30 +374,40 @@
 
         /* ===== BADGES ===== */
         .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
         }
 
         .badge-success {
-            background-color: var(--success);
-            color: var(--white);
+            background-color: #e8f5e9;
+            color: var(--success);
+            border: 1px solid var(--success);
         }
 
         .badge-warning {
-            background-color: var(--warning);
-            color: var(--white);
+            background-color: #fff3e0;
+            color: var(--warning);
+            border: 1px solid var(--warning);
         }
 
         .badge-danger {
-            background-color: var(--danger);
-            color: var(--white);
+            background-color: #ffebee;
+            color: var(--danger);
+            border: 1px solid var(--danger);
         }
 
         .badge-info {
-            background-color: var(--primary);
-            color: var(--white);
+            background-color: #e3f2fd;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .badge-secondary {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            border: 1px solid var(--gray);
         }
 
         /* ===== PAGINATION ===== */
@@ -562,7 +463,105 @@
             gap: 10px;
         }
 
-        /* ===== TOAST NOTIFICATION ===== */
+        /* ===== FORM STYLES ===== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--gray);
+            border-radius: 4px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* ===== MODAL STYLES ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            background-color: var(--primary);
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* ===== TOAST STYLES ===== */
         .toast {
             position: fixed;
             top: 20px;
@@ -594,8 +593,17 @@
             background-color: var(--warning);
         }
 
-        .toast.info {
-            background-color: var(--primary);
+        /* ===== USER AVATAR STYLES ===== */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
         }
 
         /* ===== RESPONSIVE ===== */
@@ -629,7 +637,7 @@
                 align-items: flex-start;
             }
             
-            .user-info {
+            .topbar-user-info {
                 margin-top: 10px;
             }
             
@@ -647,9 +655,9 @@
             .filter-group {
                 flex-direction: column;
             }
-
-            .form-actions {
-                flex-direction: column;
+            
+            .form-row {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -672,11 +680,14 @@
                 <a href="diagnoses.html" class="menu-item">
                     <i class="fas fa-file-medical"></i> Data Diagnosa
                 </a>
-                <a href="diseases.html" class="menu-item">
+                <a href="user_symptoms.html" class="menu-item">
                     <i class="fas fa-user-md"></i> Gejala Pengguna
                 </a>
                 <a href="gejala.html" class="menu-item">
                     <i class="fas fa-clipboard-list"></i> Data Gejala
+                </a>
+                <a href="diseases.html" class="menu-item">
+                    <i class="fas fa-disease"></i> Data Penyakit
                 </a>
                 <a href="recommendations.html" class="menu-item">
                     <i class="fas fa-lightbulb"></i> Rekomendasi
@@ -689,12 +700,14 @@
             <!-- Topbar -->
             <div class="topbar">
                 <h1>Data Pengguna</h1>
-                <div class="user-info">
-                    <div id="userAvatar" style="width: 40px; height: 40px; border-radius: 50%; background: #e3f2fd; display: flex; align-items: center; justify-content: center; color: #1565c0; font-weight: bold; margin-right: 10px; font-size: 16px;">
-                        A
+                <div class="topbar-user-info">
+                    <div class="user-info">
+                        <div id="userAvatar" class="user-avatar" style="background: #e3f2fd; color: #1565c0;">
+                            A
+                        </div>
+                        <span id="userName">Administrator</span>
                     </div>
-                    <span id="userName">Administrator</span>
-                    <button class="btn-logout" id="logoutBtn">
+                    <button class="btn btn-primary" id="logoutBtn">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
                 </div>
@@ -719,31 +732,31 @@
                     
                     <div class="stat-card" style="border-left-color: var(--success);">
                         <div class="stat-icon" style="background: #e8f5e9; color: var(--success);">
-                            <i class="fas fa-male"></i>
+                            <i class="fas fa-user-check"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="totalMale">-</h3>
-                            <p>Laki-laki</p>
+                            <h3 id="activeUsers">-</h3>
+                            <p>Pengguna Aktif</p>
                         </div>
                     </div>
                     
                     <div class="stat-card" style="border-left-color: var(--warning);">
-                        <div class="stat-icon" style="background: #fce4ec; color: #e91e63;">
-                            <i class="fas fa-female"></i>
+                        <div class="stat-icon" style="background: #fff3e0; color: var(--warning);">
+                            <i class="fas fa-file-medical"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="totalFemale">-</h3>
-                            <p>Perempuan</p>
+                            <h3 id="usersWithDiagnoses">-</h3>
+                            <p>Punya Diagnosa</p>
                         </div>
                     </div>
                     
-                    <div class="stat-card" style="border-left-color: #9c27b0;">
-                        <div class="stat-icon" style="background: #f3e5f5; color: #9c27b0;">
-                            <i class="fas fa-calendar-alt"></i>
+                    <div class="stat-card" style="border-left-color: var(--danger);">
+                        <div class="stat-icon" style="background: #ffebee; color: var(--danger);">
+                            <i class="fas fa-user-md"></i>
                         </div>
                         <div class="stat-info">
-                            <h3 id="averageAge">-</h3>
-                            <p>Usia Rata-rata</p>
+                            <h3 id="usersWithSymptoms">-</h3>
+                            <p>Punya Gejala</p>
                         </div>
                     </div>
                 </div>
@@ -757,6 +770,10 @@
                                 <i class="fas fa-sync-alt"></i>
                                 Refresh
                             </button>
+                            <button onclick="showAddModal()" class="btn btn-success">
+                                <i class="fas fa-plus"></i>
+                                Tambah Pengguna
+                            </button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -764,7 +781,7 @@
                         <div class="filters-container">
                             <div class="search-box">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="searchInput" placeholder="Cari nama pengguna..." onkeyup="applyFilters()">
+                                <input type="text" id="searchInput" placeholder="Cari nama atau email pengguna..." oninput="applyFilters()">
                             </div>
                             <div class="filter-group">
                                 <select id="genderFilter" onchange="applyFilters()">
@@ -772,10 +789,11 @@
                                     <option value="Laki-laki">Laki-laki</option>
                                     <option value="Perempuan">Perempuan</option>
                                 </select>
-                                <button onclick="resetFilters()" class="btn">
-                                    <i class="fas fa-redo"></i>
-                                    Reset
-                                </button>
+                                <select id="statusFilter" onchange="applyFilters()">
+                                    <option value="">Semua Status</option>
+                                    <option value="active">Aktif</option>
+                                    <option value="inactive">Nonaktif</option>
+                                </select>
                             </div>
                         </div>
 
@@ -785,11 +803,12 @@
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>Nama Lengkap</th>
+                                        <th>Pengguna</th>
+                                        <th>Email</th>
                                         <th>Usia</th>
                                         <th>Jenis Kelamin</th>
-                                        <th>Tanggal Dibuat</th>
-                                        <th>Diagnosa</th>
+                                        <th>Tanggal Daftar</th>
+                                        <th>Status</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -809,7 +828,7 @@
                         <div id="emptyState" class="empty-state hidden">
                             <i class="fas fa-users"></i>
                             <h3>Tidak ada data pengguna</h3>
-                            <p>Tidak ada pengguna yang ditemukan di database.</p>
+                            <p>Belum ada pengguna yang terdaftar.</p>
                         </div>
                         
                         <!-- Error State -->
@@ -837,48 +856,124 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- API Info Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Informasi API</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; align-items: flex-start; gap: 15px;">
+                            <i class="fas fa-info-circle" style="color: var(--primary); font-size: 1.2rem; margin-top: 2px;"></i>
+                            <div>
+                                <p style="margin-bottom: 10px;">
+                                    Data pengguna diambil dari endpoint: 
+                                    <code style="background: #e3f2fd; padding: 2px 6px; border-radius: 3px; font-family: monospace;" id="apiEndpoint"></code>
+                                </p>
+                                <div id="apiStatus" style="margin-top: 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal untuk Edit Pengguna -->
+    <!-- Modal untuk Add/Edit User -->
     <div id="userModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Edit Data Pengguna</h3>
-                <button class="modal-close" onclick="hideModal()">&times;</button>
+                <h3 id="userModalTitle">Tambah Pengguna Baru</h3>
+                <button class="modal-close" onclick="closeUserModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="userForm">
-                    <input type="hidden" id="userId" name="id">
+                <form id="userForm" onsubmit="saveUser(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userFullName" class="form-label">Nama Lengkap *</label>
+                            <input type="text" id="userFullName" class="form-control" required 
+                                   placeholder="Masukkan nama lengkap">
+                        </div>
+                        <div class="form-group">
+                            <label for="userEmail" class="form-label">Email *</label>
+                            <input type="email" id="userEmail" class="form-control" required 
+                                   placeholder="Masukkan email">
+                        </div>
+                    </div>
                     
-                    <div class="form-group">
-                        <label for="nama_lengkap">Nama Lengkap *</label>
-                        <input type="text" id="nama_lengkap" name="nama_lengkap" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userAge" class="form-label">Usia *</label>
+                            <input type="number" id="userAge" class="form-control" required 
+                                   min="1" max="120" placeholder="Masukkan usia">
+                        </div>
+                        <div class="form-group">
+                            <label for="userGender" class="form-label">Jenis Kelamin *</label>
+                            <select id="userGender" class="form-control" required>
+                                <option value="">Pilih Jenis Kelamin</option>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="userPhone" class="form-label">No. Telepon</label>
+                            <input type="tel" id="userPhone" class="form-control" 
+                                   placeholder="Masukkan nomor telepon">
+                        </div>
+                        <div class="form-group">
+                            <label for="userPassword" class="form-label">Password *</label>
+                            <input type="password" id="userPassword" class="form-control" required 
+                                   placeholder="Masukkan password">
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="usia">Usia *</label>
-                        <input type="number" id="usia" name="usia" min="1" max="120" required>
+                        <label for="userAddress" class="form-label">Alamat</label>
+                        <textarea id="userAddress" class="form-control form-textarea" 
+                                 placeholder="Masukkan alamat lengkap..."></textarea>
                     </div>
                     
                     <div class="form-group">
-                        <label for="jenis_kelamin">Jenis Kelamin *</label>
-                        <select id="jenis_kelamin" name="jenis_kelamin" required>
-                            <option value="">Pilih Jenis Kelamin</option>
-                            <option value="Laki-laki">Laki-laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
+                        <label class="form-label">Status</label>
+                        <div style="display: flex; gap: 20px; margin-top: 10px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="userStatus" value="active" checked>
+                                <span>Aktif</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="userStatus" value="inactive">
+                                <span>Nonaktif</span>
+                            </label>
+                        </div>
                     </div>
-        
-                    <div class="form-actions">
-                        <button type="button" class="btn" onclick="hideModal()">Batal</button>
-                        <button type="submit" class="btn btn-primary" id="submitButton">
-                            <i class="fas fa-save"></i>
-                            Simpan Perubahan
+                    
+                    <input type="hidden" id="userId">
+                    
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn" onclick="closeUserModal()">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            Simpan
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal untuk Detail User -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="detailModalTitle">Detail Pengguna</h3>
+                <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="detailContent">
+                    <!-- Detail content akan diisi oleh JavaScript -->
+                </div>
             </div>
         </div>
     </div>
@@ -888,7 +983,7 @@
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header" style="background-color: var(--danger);">
                 <h3>Konfirmasi Hapus</h3>
-                <button class="modal-close" onclick="hideDeleteModal()">&times;</button>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
             </div>
             <div class="modal-body">
                 <p id="deleteMessage">Apakah Anda yakin ingin menghapus pengguna ini?</p>
@@ -896,8 +991,8 @@
                     <i class="fas fa-exclamation-triangle"></i>
                     Tindakan ini tidak dapat dibatalkan!
                 </p>
-                <div class="form-actions">
-                    <button type="button" class="btn" onclick="hideDeleteModal()">Batal</button>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeDeleteModal()">Batal</button>
                     <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
                         <i class="fas fa-trash"></i>
                         Ya, Hapus
@@ -951,28 +1046,20 @@
             static getAdminName() {
                 return sessionStorage.getItem('adminName') || 'Administrator';
             }
-            
-            static logout() {
-                if (confirm('Apakah Anda yakin ingin logout?')) {
-                    console.log('🚪 Logging out...');
-                    this.clearSession();
-                    window.location.href = 'login.html';
-                }
-            }
         }
 
         // =============================
-        // ✅ Konfigurasi API - SESUAI DENGAN SERVER.JS ANDA
+        // ✅ Konfigurasi API - Menggunakan dari config.js
         // =============================
-        const API_BASE_URL = "http://localhost:8000";
+        const API_BASE_URL = window.API_BASE_URL || "http://localhost:8000";
 
         // =============================
         // 🔹 Service untuk mengelola pengguna
         // =============================
         class UserService {
-            static async getAll() {
+            static async getUsers() {
                 try {
-                    console.log('📡 Fetching users from API:', `${API_BASE_URL}/users`);
+                    console.log('📡 Fetching users from:', `${API_BASE_URL}/users`);
                     const response = await fetch(`${API_BASE_URL}/users`);
                     
                     if (!response.ok) {
@@ -988,13 +1075,14 @@
                 }
             }
 
-            static async getById(id) {
+            static async getUserById(id) {
                 try {
-                    console.log('📡 Fetching user by ID:', `${API_BASE_URL}/users/${id}`);
                     const response = await fetch(`${API_BASE_URL}/users/${id}`);
+                    
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
+                    
                     return await response.json();
                 } catch (error) {
                     console.error('❌ Error fetching user:', error);
@@ -1002,15 +1090,36 @@
                 }
             }
 
-            static async update(id, userData) {
+            static async create(user) {
                 try {
-                    console.log('📡 Updating user:', `${API_BASE_URL}/users/${id}`, userData);
+                    const response = await fetch(`${API_BASE_URL}/users`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(user)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('❌ Error creating user:', error);
+                    throw error;
+                }
+            }
+
+            static async update(id, user) {
+                try {
                     const response = await fetch(`${API_BASE_URL}/users/${id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(userData)
+                        body: JSON.stringify(user)
                     });
                     
                     if (!response.ok) {
@@ -1027,7 +1136,6 @@
 
             static async delete(id) {
                 try {
-                    console.log('📡 Deleting user:', `${API_BASE_URL}/users/${id}`);
                     const response = await fetch(`${API_BASE_URL}/users/${id}`, {
                         method: 'DELETE'
                     });
@@ -1043,27 +1151,41 @@
                     throw error;
                 }
             }
-        }
 
-        // =============================
-        // 🔹 Service untuk mendapatkan data diagnosa pengguna
-        // =============================
-        class DiagnosisService {
-            static async getAll() {
+            static async getApiStatus() {
                 try {
-                    console.log('📡 Fetching diagnoses from API:', `${API_BASE_URL}/diagnoses`);
-                    const response = await fetch(`${API_BASE_URL}/diagnoses`);
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    console.log('✅ Diagnoses data received:', data.length, 'records');
-                    return data;
+                    const response = await fetch(`${API_BASE_URL}/test-db`);
+                    return response.ok;
                 } catch (error) {
-                    console.error('❌ Error fetching diagnoses:', error);
-                    return []; // Return empty array if error
+                    console.error('❌ Error checking API status:', error);
+                    return false;
+                }
+            }
+
+            static async getUserStats() {
+                try {
+                    const [users, diagnoses] = await Promise.all([
+                        this.getUsers().catch(() => []),
+                        fetch(`${API_BASE_URL}/diagnoses`).then(r => r.ok ? r.json() : [])
+                    ]);
+                    
+                    return {
+                        totalUsers: users.length,
+                        activeUsers: users.filter(u => u.status === 'active' || u.status === true).length,
+                        usersWithDiagnoses: new Set(diagnoses.map(d => d.user_id)).size,
+                        usersWithSymptoms: new Set(
+                            await fetch(`${API_BASE_URL}/user_symptoms`).then(r => r.ok ? r.json() : [])
+                                .then(symptoms => symptoms.map(s => s.user_id))
+                        ).size
+                    };
+                } catch (error) {
+                    console.error('❌ Error fetching user stats:', error);
+                    return {
+                        totalUsers: 0,
+                        activeUsers: 0,
+                        usersWithDiagnoses: 0,
+                        usersWithSymptoms: 0
+                    };
                 }
             }
         }
@@ -1076,13 +1198,40 @@
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
                 toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    color: white;
+                    font-weight: 500;
+                    z-index: 1000;
+                    transition: all 0.3s ease;
+                `;
+                
+                if (type === 'success') {
+                    toast.style.backgroundColor = 'var(--success)';
+                } else if (type === 'error') {
+                    toast.style.backgroundColor = 'var(--danger)';
+                } else if (type === 'warning') {
+                    toast.style.backgroundColor = 'var(--warning)';
+                } else {
+                    toast.style.backgroundColor = 'var(--primary)';
+                }
                 
                 document.body.appendChild(toast);
                 
-                setTimeout(() => toast.classList.add('show'), 100);
-                
+                // Show with animation
                 setTimeout(() => {
-                    toast.classList.remove('show');
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateX(0)';
+                }, 10);
+                
+                // Auto hide after 3 seconds
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
                     setTimeout(() => {
                         if (toast.parentNode) {
                             toast.parentNode.removeChild(toast);
@@ -1093,37 +1242,9 @@
         }
 
         // =============================
-        // 🔹 Modal Functions
-        // =============================
-        function showModal() {
-            document.getElementById('userModal').classList.add('show');
-        }
-
-        function hideModal() {
-            document.getElementById('userModal').classList.remove('show');
-            document.getElementById('userForm').reset();
-            document.getElementById('userId').value = '';
-        }
-
-        function showDeleteModal(userId, userName) {
-            document.getElementById('deleteMessage').textContent = 
-                `Apakah Anda yakin ingin menghapus pengguna "${userName}"?`;
-            document.getElementById('deleteModal').classList.add('show');
-            
-            // Setup delete confirmation
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-            confirmBtn.onclick = () => deleteUserConfirmed(userId);
-        }
-
-        function hideDeleteModal() {
-            document.getElementById('deleteModal').classList.remove('show');
-        }
-
-        // =============================
         // 🔹 State Management
         // =============================
         let usersData = [];
-        let diagnosesData = [];
         let filteredUsers = [];
         let currentPage = 1;
         const usersPerPage = 10;
@@ -1180,31 +1301,77 @@
         }
 
         // =============================
-        // 🔹 Ambil data pengguna dari API
+        // 🔹 Initialize dashboard
         // =============================
-        async function loadUsersData() {
+        function initializeDashboard() {
+            console.log('🎯 Initializing dashboard...');
+            
+            // Cek session terlebih dahulu
             if (!SessionManager.checkSession()) {
                 window.location.href = 'login.html';
                 return;
             }
             
+            try {
+                // Setup UI
+                UIController.updateUserInfo();
+                
+                // Setup event listeners
+                document.getElementById('logoutBtn').addEventListener('click', function() {
+                    if (confirm('Apakah Anda yakin ingin logout?')) {
+                        console.log('🚪 Logging out...');
+                        SessionManager.clearSession();
+                        window.location.href = 'login.html';
+                    }
+                });
+                
+                // Close modal ketika klik di luar modal
+                document.getElementById('userModal').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeUserModal();
+                    }
+                });
+                
+                document.getElementById('detailModal').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeDetailModal();
+                    }
+                });
+                
+                document.getElementById('deleteModal').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeDeleteModal();
+                    }
+                });
+                
+                // Update API endpoint info
+                document.getElementById('apiEndpoint').textContent = `${API_BASE_URL}/users`;
+                
+                console.log('🎉 Dashboard fully initialized');
+                
+            } catch (error) {
+                console.error('❌ Error initializing dashboard:', error);
+                UIController.showMessage('Terjadi kesalahan saat memuat halaman', 'error');
+            }
+        }
+
+        // =============================
+        // 🔹 Ambil data pengguna dari API
+        // =============================
+        async function loadUsersData() {
             UIController.showLoading();
             
             try {
-                // Load users and diagnoses in parallel
-                const [usersResponse, diagnosesResponse] = await Promise.all([
-                    UserService.getAll().catch(err => {
-                        console.error('Error in users fetch:', err);
-                        throw err;
-                    }),
-                    DiagnosisService.getAll().catch(err => {
-                        console.error('Error in diagnoses fetch:', err);
-                        return []; // Continue even if diagnoses fail
-                    })
-                ]);
+                // Test API connection first
+                const apiStatus = await UserService.getApiStatus();
+                updateApiStatus(apiStatus);
                 
-                usersData = usersResponse;
-                diagnosesData = diagnosesResponse;
+                if (!apiStatus) {
+                    throw new Error('Tidak dapat terhubung ke server API');
+                }
+                
+                // Load users data
+                usersData = await UserService.getUsers();
                 filteredUsers = [...usersData];
                 
                 UIController.hideLoading();
@@ -1228,114 +1395,90 @@
         }
 
         // =============================
-        // 🔹 Update statistics cards
+        // 🔹 Update API status display
         // =============================
-        function updateStatistics() {
-            const totalUsers = usersData.length;
-            const totalMale = usersData.filter(user => user.jenis_kelamin === 'Laki-laki').length;
-            const totalFemale = usersData.filter(user => user.jenis_kelamin === 'Perempuan').length;
+        function updateApiStatus(status) {
+            const apiStatusElement = document.getElementById('apiStatus');
             
-            // Hitung usia rata-rata
-            const totalAge = usersData.reduce((sum, user) => sum + (parseInt(user.usia) || 0), 0);
-            const averageAge = totalUsers > 0 ? Math.round(totalAge / totalUsers) : 0;
-
-            document.getElementById('totalUsers').textContent = totalUsers;
-            document.getElementById('totalMale').textContent = totalMale;
-            document.getElementById('totalFemale').textContent = totalFemale;
-            document.getElementById('averageAge').textContent = `${averageAge} tahun`;
+            if (status) {
+                apiStatusElement.innerHTML = `
+                    <span style="color: var(--success);">
+                        <i class="fas fa-check-circle"></i> API terhubung dengan baik
+                    </span>
+                `;
+            } else {
+                apiStatusElement.innerHTML = `
+                    <span style="color: var(--danger);">
+                        <i class="fas fa-times-circle"></i> API tidak terhubung
+                    </span>
+                    <p style="color: var(--gray-dark); font-size: 0.9rem; margin-top: 5px;">
+                        Pastikan server API berjalan di ${API_BASE_URL}
+                    </p>
+                `;
+            }
         }
 
         // =============================
-        // 🔹 Render data ke tabel
+        // 🔹 Update statistics cards
         // =============================
-        function renderUsersTable() {
-            const tableBody = document.getElementById('usersTableBody');
-            
-            // Calculate pagination
-            const startIndex = (currentPage - 1) * usersPerPage;
-            const endIndex = startIndex + usersPerPage;
-            const usersToShow = filteredUsers.slice(startIndex, endIndex);
-            
-            if (usersToShow.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" style="padding: 40px; color: var(--gray-dark); text-align: center;">
-                            <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                            Tidak ada pengguna yang sesuai dengan filter
-                        </td>
-                    </tr>
-                `;
-            } else {
-                tableBody.innerHTML = usersToShow
-                    .map(user => {
-                        // Find user's diagnoses
-                        const userDiagnoses = diagnosesData.filter(d => d.user_id === user.id);
-                        const latestDiagnosis = userDiagnoses.length > 0 ? userDiagnoses[0] : null;
-                        
-                        // Get diagnosis badge
-                        let diagnosisBadge = '';
-                        if (latestDiagnosis) {
-                            let badgeClass = 'badge-info';
-                            if (latestDiagnosis.tingkat_risiko === 'Rendah') badgeClass = 'badge-success';
-                            else if (latestDiagnosis.tingkat_risiko === 'Sedang') badgeClass = 'badge-warning';
-                            else if (latestDiagnosis.tingkat_risiko === 'Tinggi') badgeClass = 'badge-danger';
-                            
-                            diagnosisBadge = `
-                                <span class="badge ${badgeClass}">
-                                    ${latestDiagnosis.tingkat_risiko}
-                                </span>
-                            `;
-                        } else {
-                            diagnosisBadge = '<span style="color: var(--gray-dark); font-size: 0.9rem;">Belum ada</span>';
-                        }
-                        
-                        return `
-                        <tr>
-                            <td>
-                                <div style="font-weight: 500; color: var(--primary);">${user.id}</div>
-                            </td>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div style="width: 32px; height: 32px; background: ${user.jenis_kelamin === 'Laki-laki' ? '#e3f2fd' : '#fce4ec'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; color: ${user.jenis_kelamin === 'Laki-laki' ? '#1565c0' : '#e91e63'};">
-                                        ${user.jenis_kelamin === 'Laki-laki' ? 'L' : 'P'}
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 500;">${user.nama_lengkap}</div>
-                                        <div style="font-size: 0.8rem; color: var(--gray-dark);">ID: ${user.id}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="font-weight: 500;">${user.usia} tahun</div>
-                            </td>
-                            <td>
-                                <span class="badge ${user.jenis_kelamin === 'Laki-laki' ? 'badge-info' : 'badge-warning'}">
-                                    ${user.jenis_kelamin}
-                                </span>
-                            </td>
-                            <td>
-                                <div style="color: var(--gray-dark); font-size: 0.9rem;">
-                                    ${formatDate(user.created_at)}
-                                </div>
-                            </td>
-                            <td>
-                                ${diagnosisBadge}
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    <button onclick="editUser(${user.id})" class="btn btn-warning btn-sm" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button onclick="deleteUser(${user.id}, '${user.nama_lengkap}')" class="btn btn-danger btn-sm" title="Hapus">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `}).join('');
+        async function updateStatistics() {
+            try {
+                const stats = await UserService.getUserStats();
+                
+                document.getElementById('totalUsers').textContent = stats.totalUsers;
+                document.getElementById('activeUsers').textContent = stats.activeUsers;
+                document.getElementById('usersWithDiagnoses').textContent = stats.usersWithDiagnoses;
+                document.getElementById('usersWithSymptoms').textContent = stats.usersWithSymptoms;
+            } catch (error) {
+                console.error('❌ Error updating statistics:', error);
+                // Use basic counts from loaded data
+                const totalUsers = usersData.length;
+                const activeUsers = usersData.filter(u => u.status === 'active' || u.status === true).length;
+                
+                document.getElementById('totalUsers').textContent = totalUsers;
+                document.getElementById('activeUsers').textContent = activeUsers;
+                document.getElementById('usersWithDiagnoses').textContent = '-';
+                document.getElementById('usersWithSymptoms').textContent = '-';
             }
-            
-            updatePaginationInfo();
+        }
+
+        // =============================
+        // 🔹 Helper functions untuk styling
+        // =============================
+        function getUserAvatarColor(name) {
+            const colors = [
+                { bg: '#e3f2fd', color: '#1565c0' }, // Blue
+                { bg: '#f3e5f5', color: '#7b1fa2' }, // Purple
+                { bg: '#e8f5e9', color: '#2e7d32' }, // Green
+                { bg: '#ffebee', color: '#c62828' }, // Red
+                { bg: '#fff3e0', color: '#ef6c00' }  // Orange
+            ];
+            if (!name) return colors[0];
+            const index = name.length % colors.length;
+            return colors[index];
+        }
+
+        function getUserInitial(name) {
+            if (!name) return '?';
+            const names = name.split(' ');
+            if (names.length === 1) return names[0].charAt(0).toUpperCase();
+            return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+        }
+
+        function getGenderBadgeClass(gender) {
+            switch(gender?.toLowerCase()) {
+                case 'laki-laki': return 'badge-info';
+                case 'perempuan': return 'badge-secondary';
+                default: return 'badge-info';
+            }
+        }
+
+        function getStatusBadge(status) {
+            const isActive = status === 'active' || status === true || status === '1';
+            return {
+                text: isActive ? 'Aktif' : 'Nonaktif',
+                class: isActive ? 'badge-success' : 'badge-danger'
+            };
         }
 
         // =============================
@@ -1352,12 +1495,98 @@
         }
 
         // =============================
+        // 🔹 Render table view
+        // =============================
+        function renderUsersTable() {
+            const tableBody = document.getElementById('usersTableBody');
+            
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * usersPerPage;
+            const endIndex = startIndex + usersPerPage;
+            const usersToShow = filteredUsers.slice(startIndex, endIndex);
+            
+            if (usersToShow.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="padding: 40px; color: var(--gray-dark); text-align: center;">
+                            <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                            Tidak ada data pengguna yang sesuai dengan filter
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tableBody.innerHTML = usersToShow
+                    .map(user => {
+                        const avatarColors = getUserAvatarColor(user.nama_lengkap);
+                        const statusBadge = getStatusBadge(user.status);
+                        
+                        return `
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 500; color: var(--primary);">${user.id}</div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 32px; height: 32px; background: ${avatarColors.bg}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; color: ${avatarColors.color};">
+                                            ${getUserInitial(user.nama_lengkap)}
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 500;">${user.nama_lengkap || 'Unknown'}</div>
+                                            <div style="font-size: 0.8rem; color: var(--gray-dark);">${user.email}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="color: var(--dark);">${user.email}</div>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 500; color: var(--primary);">${user.usia || '-'}</div>
+                                </td>
+                                <td>
+                                    <span class="badge ${getGenderBadgeClass(user.jenis_kelamin)}">
+                                        ${user.jenis_kelamin || '-'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="color: var(--gray-dark); font-size: 0.9rem;">
+                                        ${formatDate(user.created_at)}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge ${statusBadge.class}">
+                                        ${statusBadge.text}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button onclick="viewUserDetail(${user.id})" class="btn btn-primary btn-sm" title="Lihat Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button onclick="editUser(${user.id})" class="btn btn-warning btn-sm" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button onclick="deleteUser(${user.id}, '${user.nama_lengkap}')" class="btn btn-danger btn-sm" title="Hapus">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+            }
+            
+            // Update pagination info
+            updatePaginationInfo();
+        }
+
+        // =============================
         // 🔹 Update informasi pagination
         // =============================
         function updatePaginationInfo() {
             const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
             document.getElementById('pageInfo').textContent = `Halaman ${currentPage} dari ${totalPages}`;
             
+            // Disable/enable pagination buttons
             document.getElementById('prevBtn').disabled = currentPage === 1;
             document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
         }
@@ -1368,15 +1597,25 @@
         function applyFilters() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const genderValue = document.getElementById('genderFilter').value;
+            const statusValue = document.getElementById('statusFilter').value;
             
             filteredUsers = usersData.filter(user => {
                 const userName = (user.nama_lengkap || '').toLowerCase();
+                const userEmail = (user.email || '').toLowerCase();
                 const userGender = user.jenis_kelamin;
+                const userStatus = user.status;
                 
-                const matchesSearch = userName.includes(searchTerm);
+                const matchesSearch = userName.includes(searchTerm) || userEmail.includes(searchTerm);
                 const matchesGender = !genderValue || userGender === genderValue;
                 
-                return matchesSearch && matchesGender;
+                // Handle status filter
+                let matchesStatus = true;
+                if (statusValue !== '') {
+                    const isActive = userStatus === 'active' || userStatus === true;
+                    matchesStatus = (statusValue === 'active') ? isActive : !isActive;
+                }
+                
+                return matchesSearch && matchesGender && matchesStatus;
             });
             
             currentPage = 1;
@@ -1389,10 +1628,11 @@
         function resetFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('genderFilter').value = '';
+            document.getElementById('statusFilter').value = '';
             filteredUsers = [...usersData];
             currentPage = 1;
             renderUsersTable();
-            Toast.show('Filter telah direset', 'info');
+            UIController.showMessage('Filter telah direset', 'info');
         }
 
         // =============================
@@ -1414,61 +1654,209 @@
         }
 
         // =============================
-        // 🔹 Edit user
+        // 🔹 Show Add User Modal
+        // =============================
+        function showAddModal() {
+            document.getElementById('userModalTitle').textContent = 'Tambah Pengguna Baru';
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            // Set default status to active
+            document.querySelector('input[name="userStatus"][value="active"]').checked = true;
+            document.getElementById('userModal').classList.add('show');
+        }
+
+        // =============================
+        // 🔹 Close User Modal
+        // =============================
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('show');
+            document.getElementById('userForm').reset();
+        }
+
+        // =============================
+        // 🔹 Edit User
         // =============================
         async function editUser(id) {
             try {
-                const user = await UserService.getById(id);
+                const user = await UserService.getUserById(id);
                 
-                // Isi form dengan data user
+                document.getElementById('userModalTitle').textContent = 'Edit Pengguna';
                 document.getElementById('userId').value = user.id;
-                document.getElementById('nama_lengkap').value = user.nama_lengkap || '';
-                document.getElementById('usia').value = user.usia || '';
-                document.getElementById('jenis_kelamin').value = user.jenis_kelamin || '';
+                document.getElementById('userFullName').value = user.nama_lengkap;
+                document.getElementById('userEmail').value = user.email;
+                document.getElementById('userAge').value = user.usia;
+                document.getElementById('userGender').value = user.jenis_kelamin;
+                document.getElementById('userPhone').value = user.no_telepon || '';
+                document.getElementById('userAddress').value = user.alamat || '';
                 
-                // Tampilkan modal
-                showModal();
+                // Set status radio button
+                const isActive = user.status === 'active' || user.status === true;
+                document.querySelector(`input[name="userStatus"][value="${isActive ? 'active' : 'inactive'}"]`).checked = true;
+                
+                // Password field can be left blank for update (don't change)
+                document.getElementById('userPassword').required = false;
+                
+                document.getElementById('userModal').classList.add('show');
                 
             } catch (error) {
-                console.error('❌ Error loading user for edit:', error);
-                Toast.show(`Gagal memuat data pengguna: ${error.message}`, 'error');
+                console.error('❌ Error loading user:', error);
+                UIController.showMessage('Gagal memuat data pengguna', 'error');
             }
         }
 
         // =============================
-        // 🔹 Form Handler untuk Edit
+        // 🔹 Save User (Create/Update)
         // =============================
-        document.getElementById('userForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        async function saveUser(event) {
+            event.preventDefault();
             
-            const formData = new FormData(this);
+            const userId = document.getElementById('userId').value;
             const userData = {
-                nama_lengkap: formData.get('nama_lengkap'),
-                usia: parseInt(formData.get('usia')),
-                jenis_kelamin: formData.get('jenis_kelamin')
+                nama_lengkap: document.getElementById('userFullName').value,
+                email: document.getElementById('userEmail').value,
+                usia: parseInt(document.getElementById('userAge').value),
+                jenis_kelamin: document.getElementById('userGender').value,
+                no_telepon: document.getElementById('userPhone').value || null,
+                alamat: document.getElementById('userAddress').value || null,
+                status: document.querySelector('input[name="userStatus"]:checked').value
             };
-
-            const userId = formData.get('id');
-            const submitButton = document.getElementById('submitButton');
-            const originalText = submitButton.innerHTML;
+            
+            // Jika password diisi, tambahkan ke data
+            const password = document.getElementById('userPassword').value;
+            if (password) {
+                userData.password = password;
+            }
+            
+            // Validasi data
+            if (userData.usia < 1 || userData.usia > 120) {
+                Toast.show('Usia harus antara 1 sampai 120 tahun', 'error');
+                return;
+            }
             
             try {
-                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-                submitButton.disabled = true;
+                if (userId) {
+                    // Update existing user
+                    await UserService.update(userId, userData);
+                    Toast.show('Pengguna berhasil diperbarui!', 'success');
+                } else {
+                    // Create new user
+                    if (!password) {
+                        Toast.show('Password wajib diisi untuk pengguna baru', 'error');
+                        return;
+                    }
+                    await UserService.create(userData);
+                    Toast.show('Pengguna berhasil ditambahkan!', 'success');
+                }
                 
-                await UserService.update(userId, userData);
-                Toast.show('Data pengguna berhasil diperbarui!', 'success');
+                closeUserModal();
+                loadUsersData();
                 
-                hideModal();
-                loadUsersData(); // Reload data
             } catch (error) {
-                console.error('❌ Error updating user:', error);
-                Toast.show(`Gagal memperbarui data: ${error.message}`, 'error');
-            } finally {
-                submitButton.innerHTML = originalText;
-                submitButton.disabled = false;
+                console.error('❌ Error saving user:', error);
+                Toast.show(`Gagal menyimpan pengguna: ${error.message}`, 'error');
             }
-        });
+        }
+
+        // =============================
+        // 🔹 View user detail
+        // =============================
+        async function viewUserDetail(id) {
+            try {
+                const user = await UserService.getUserById(id);
+                const statusBadge = getStatusBadge(user.status);
+                const avatarColors = getUserAvatarColor(user.nama_lengkap);
+                
+                document.getElementById('detailModalTitle').textContent = `Detail: ${user.nama_lengkap}`;
+                
+                document.getElementById('detailContent').innerHTML = `
+                    <div style="display: grid; gap: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <div style="display: flex; flex-direction: column; align-items: center; padding: 20px; background: ${avatarColors.bg}; border-radius: 8px; border-left: 4px solid ${avatarColors.color};">
+                                    <div style="width: 80px; height: 80px; background: ${avatarColors.color}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; color: white; margin-bottom: 15px;">
+                                        ${getUserInitial(user.nama_lengkap)}
+                                    </div>
+                                    <h4 style="color: ${avatarColors.color}; margin-bottom: 5px;">${user.nama_lengkap}</h4>
+                                    <p style="color: ${avatarColors.color}; opacity: 0.8;">ID: ${user.id}</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div style="background: #fff3e0; padding: 20px; border-radius: 8px; border-left: 4px solid var(--warning);">
+                                    <h4 style="margin-bottom: 15px; color: var(--warning);">Informasi Kontak</h4>
+                                    <p><strong>Email:</strong> ${user.email}</p>
+                                    <p><strong>No. Telepon:</strong> ${user.no_telepon || '-'}</p>
+                                    <p><strong>Status:</strong> 
+                                        <span class="badge ${statusBadge.class}">
+                                            ${statusBadge.text}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 4px solid var(--success);">
+                                    <h4 style="margin-bottom: 15px; color: var(--success);">Informasi Pribadi</h4>
+                                    <p><strong>Usia:</strong> ${user.usia || '-'} tahun</p>
+                                    <p><strong>Jenis Kelamin:</strong> 
+                                        <span class="badge ${getGenderBadgeClass(user.jenis_kelamin)}">
+                                            ${user.jenis_kelamin || '-'}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div style="background: #f3e5f5; padding: 20px; border-radius: 8px; border-left: 4px solid #7b1fa2;">
+                                    <h4 style="margin-bottom: 15px; color: #7b1fa2;">Metadata</h4>
+                                    <p><strong>Tanggal Daftar:</strong> ${formatDate(user.created_at)}</p>
+                                    <p><strong>Terakhir Login:</strong> ${formatDate(user.last_login) || '-'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${user.alamat ? `
+                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                                <h4 style="margin-bottom: 10px; color: var(--primary);">Alamat</h4>
+                                <p style="white-space: pre-line;">${user.alamat}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                document.getElementById('detailModal').classList.add('show');
+                
+            } catch (error) {
+                console.error('❌ Error loading user:', error);
+                UIController.showMessage('Gagal memuat detail pengguna', 'error');
+            }
+        }
+
+        // =============================
+        // 🔹 Close detail modal
+        // =============================
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.remove('show');
+        }
+
+        // =============================
+        // 🔹 Show delete confirmation modal
+        // =============================
+        function showDeleteModal(id, userName) {
+            document.getElementById('deleteMessage').textContent = 
+                `Apakah Anda yakin ingin menghapus pengguna "${userName}"?`;
+            document.getElementById('deleteModal').classList.add('show');
+            
+            // Setup delete confirmation
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            confirmBtn.onclick = () => deleteUserConfirmed(id);
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+        }
 
         // =============================
         // 🔹 Delete user
@@ -1478,7 +1866,7 @@
         }
 
         async function deleteUserConfirmed(id) {
-            hideDeleteModal();
+            closeDeleteModal();
             
             try {
                 await UserService.delete(id);
@@ -1505,23 +1893,7 @@
             
             try {
                 // Setup UI
-                UIController.updateUserInfo();
-                
-                // Setup event listeners
-                document.getElementById('logoutBtn').addEventListener('click', SessionManager.logout);
-                
-                // Close modal ketika klik di luar modal
-                document.getElementById('userModal').addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        hideModal();
-                    }
-                });
-                
-                document.getElementById('deleteModal').addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        hideDeleteModal();
-                    }
-                });
+                initializeDashboard();
                 
                 // Load data
                 loadUsersData();
