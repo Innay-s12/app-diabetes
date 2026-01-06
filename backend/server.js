@@ -86,8 +86,8 @@ const mockDB = {
                     { id: 2, nama_lengkap: 'Jane Smith', usia: 25, jenis_kelamin: 'P' }
                 ]);
             }
-            else if (sql.includes('symptoms')) {
-                callback(null = [
+           else if (sql.includes('symptoms')) {
+                callback(null, [
                     { id: 1, kode_gejala: 'G01', nama_gejala: 'Sering Haus', bobot: 2 },
                     { id: 2, kode_gejala: 'G02', nama_gejala: 'Sering Buang Air', bobot: 3 },
                     { id: 3, kode_gejala: 'G03', nama_gejala: 'Lelah Berlebihan', bobot: 2 }
