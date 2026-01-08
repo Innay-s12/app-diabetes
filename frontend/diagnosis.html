@@ -321,688 +321,134 @@
   </footer>
 
   <script>
-    // =============================
-    // 🚀 SISTEM DIAGNOSIS - FIXED FOR RAILWAY
-    // =============================
-
-    // ✅ 1. KONFIGURASI API - MENGGUNAKAN CONFIG.JS
-    console.log('🎯 Diagnosis System Initializing...');
-
-    // Pastikan config.js sudah diload
-    if (!window.API_CONFIG) {
-        console.error('❌ config.js not loaded! Creating fallback config...');
-        window.API_CONFIG = {
-            BASE_URL: window.location.origin,
-            ENDPOINTS: {
-                SYMPTOMS: '/api/symptoms',
-                USERS: '/api/users',
-                DIAGNOSES: '/api/diagnoses',
-                USER_SYMPTOMS: '/api/user-symptoms',
-                RECOMMENDATIONS: '/api/recommendations',
-                DIAGNOSIS_PROCESS: '/api/diagnosis/process'
-            },
-            getUrl: function(endpoint) {
-                return this.BASE_URL + endpoint;
-            }
-        };
-    }
-
-    console.log('✅ API Config:', window.API_CONFIG);
-
-    // ✅ 2. KONSTANTA GLOBAL
-    const API_BASE_URL = window.API_CONFIG.BASE_URL;
-    const API_SYMPTOMS_URL = window.API_CONFIG.getUrl('/api/symptoms');
-    const API_USERS_URL = window.API_CONFIG.getUrl('/api/users');
-    const API_DIAGNOSES_URL = window.API_CONFIG.getUrl('/api/diagnoses');
-    const API_USER_SYMPTOMS_URL = window.API_CONFIG.getUrl('/api/user-symptoms');
-    const API_RECOMMENDATIONS_URL = window.API_CONFIG.getUrl('/api/recommendations');
-
-    // ✅ 3. VARIABEL GLOBAL
+    // 1. Variabel Global
     let symptoms = [];
     let selectedSymptoms = [];
     let selectedGender = '';
 
-    // ✅ 4. UTILITY FUNCTIONS
-    class ApiService {
-        static async request(endpoint, options = {}) {
-            // Gunakan endpoint dari config.js
-            const url = window.API_CONFIG.getUrl(endpoint);
-            
-            console.log(`🌐 API Request: ${url}`, options);
-            
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                ...options
-            };
-
-            if (options.body) {
-                config.body = JSON.stringify(options.body);
-            }
-
-            try {
-                const response = await fetch(url, config);
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-                }
-                
-                const data = await response.json();
-                console.log(`✅ API Response ${endpoint}:`, data);
-                return data;
-            } catch (error) {
-                console.error(`❌ API Request failed ${endpoint}:`, error);
-                throw error;
-            }
-        }
-
-        static async get(endpoint) {
-            return this.request(endpoint);
-        }
-
-        static async post(endpoint, data) {
-            return this.request(endpoint, {
-                method: 'POST',
-                body: data
-            });
-        }
-    }
-
-    // ✅ 5. TOAST NOTIFICATION
-    class Toast {
-        static show(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => toast.classList.add('show'), 100);
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 300);
-            }, 3000);
-        }
-    }
-
-    // ✅ 6. DIAGNOSIS SERVICE
-    class DiagnosisService {
-        // Ambil gejala dari API
-        static async getSymptoms() {
-            try {
-                console.log('📡 Memuat gejala dari API...');
-                const endpoint = window.API_CONFIG.ENDPOINTS.SYMPTOMS || '/api/symptoms';
-                const response = await ApiService.get(endpoint);
-                
-                if (!Array.isArray(response)) {
-                    throw new Error('Response is not an array');
-                }
-                
-                console.log(`✅ Gejala diterima: ${response.length} item`);
-                return response;
-            } catch (error) {
-                console.error('❌ Error fetching symptoms:', error);
-                return this.getFallbackSymptoms();
-            }
-        }
-
-        // Data gejala fallback
-        static getFallbackSymptoms() {
-            return [
-                { id: 1, kode_gejala: 'G01', nama_gejala: 'Sering Merasa Haus', deskripsi: 'Merasa haus terus menerus meskipun sudah minum' },
-                { id: 2, kode_gejala: 'G02', nama_gejala: 'Berat Badan Berlebih', deskripsi: 'Memiliki indeks massa tubuh di atas normal' },
-                { id: 3, kode_gejala: 'G03', nama_gejala: 'Dalam Masa Kehamilan', deskripsi: 'Sedang hamil atau pernah mengalami diabetes gestasional' },
-                { id: 4, kode_gejala: 'G04', nama_gejala: 'Kulit Sensitif', deskripsi: 'Kulit mudah terluka dan lama sembuh' },
-                { id: 5, kode_gejala: 'G05', nama_gejala: 'Sering Buang Air Kecil', deskripsi: 'Sering buang air kecil terutama di malam hari' },
-                { id: 6, kode_gejala: 'G06', nama_gejala: 'Sering Sakit Kepala', deskripsi: 'Sering mengalami sakit kepala terutama di bagian belakang' }
-            ];
-        }
-
-        // Buat user baru
-        static async createUser(userData) {
-            try {
-                const endpoint = window.API_CONFIG.ENDPOINTS.USERS || '/api/users';
-                const response = await ApiService.post(endpoint, userData);
-                
-                // Handle response format
-                if (response.id) {
-                    return { id: response.id };
-                } else if (response.insertId) {
-                    return { id: response.insertId };
-                } else if (response.user && response.user.id) {
-                    return { id: response.user.id };
-                } else {
-                    return { id: 1 }; // Fallback ID
-                }
-            } catch (error) {
-                console.error('❌ Error creating user:', error);
-                throw error;
-            }
-        }
-
-        // Tambah gejala ke user
-        static async addUserSymptoms(userId, symptomIds) {
-            try {
-                const endpoint = window.API_CONFIG.ENDPOINTS.USER_SYMPTOMS || '/api/user-symptoms';
-                const promises = symptomIds.map(symptomId => {
-                    return ApiService.post(endpoint, {
-                        user_id: userId,
-                        symptom_id: symptomId
-                    });
-                });
-                
-                const results = await Promise.all(promises);
-                console.log('✅ User symptoms added:', results);
-                return results;
-            } catch (error) {
-                console.error('❌ Error adding user symptoms:', error);
-                throw error;
-            }
-        }
-
-        // Buat diagnosis
-        static async createDiagnosis(diagnosisData) {
-            try {
-                const endpoint = window.API_CONFIG.ENDPOINTS.DIAGNOSES || '/api/diagnoses';
-                const response = await ApiService.post(endpoint, diagnosisData);
-                return response;
-            } catch (error) {
-                console.error('❌ Error creating diagnosis:', error);
-                throw error;
-            }
-        }
-
-        // Ambil rekomendasi berdasarkan tingkat risiko
-        static async getRecommendationsByRisk(tingkat_risiko) {
-            try {
-                console.log(`📡 Mengambil rekomendasi untuk risiko: ${tingkat_risiko}`);
-                const endpoint = window.API_CONFIG.ENDPOINTS.RECOMMENDATIONS || '/api/recommendations';
-                const response = await ApiService.get(endpoint);
-                
-                if (!Array.isArray(response)) {
-                    throw new Error('Recommendations response is not an array');
-                }
-                
-                // Filter berdasarkan tingkat risiko
-                const filtered = response.filter(rec => 
-                    rec.untuk_tingkat_risiko === tingkat_risiko
-                );
-                
-                console.log(`✅ Rekomendasi untuk ${tingkat_risiko}: ${filtered.length} item`);
-                
-                // Jika tidak ada rekomendasi spesifik, ambil semua
-                return filtered.length > 0 ? filtered : response;
-            } catch (error) {
-                console.error('❌ Error fetching recommendations:', error);
-                return this.getFallbackRecommendations(tingkat_risiko);
-            }
-        }
-
-        // Rekomendasi fallback
-        static getFallbackRecommendations(tingkat_risiko) {
-            const defaultRecommendations = {
-                'Tinggi': [
-                    { 
-                        kategori: 'Pemeriksaan Medis', 
-                        judul: 'Segera lakukan pemeriksaan', 
-                        deskripsi: 'Bersegeralah melakukan pemeriksaan klinis pada dokter',
-                        untuk_tingkat_risiko: 'Tinggi'
-                    },
-                    { 
-                        kategori: 'Pola Makan', 
-                        judul: 'Perbanyak serat', 
-                        deskripsi: 'Perbanyak makan sayur hijau dan buah rendah gula',
-                        untuk_tingkat_risiko: 'Tinggi'
-                    }
-                ],
-                'Sedang': [
-                    { 
-                        kategori: 'Aktivitas Fisik', 
-                        judul: 'Olahraga rutin', 
-                        deskripsi: 'Lakukan olahraga ringan 30 menit sehari',
-                        untuk_tingkat_risiko: 'Sedang'
-                    },
-                    { 
-                        kategori: 'Pola Makan', 
-                        judul: 'Atur porsi makan', 
-                        deskripsi: 'Makan dengan teratur dan hindari makan berlebih',
-                        untuk_tingkat_risiko: 'Sedang'
-                    }
-                ],
-                'Rendah': [
-                    { 
-                        kategori: 'Pola Makan', 
-                        judul: 'Perbanyak minum air putih', 
-                        deskripsi: 'Minum air putih 6-8 gelas/hari',
-                        untuk_tingkat_risiko: 'Rendah'
-                    },
-                    { 
-                        kategori: 'Pemantauan', 
-                        judul: 'Hindari sabun antiseptik keras', 
-                        deskripsi: 'Hindari penggunakan sabun antiseptik yang keras',
-                        untuk_tingkat_risiko: 'Rendah'
-                    }
-                ]
-            };
-            
-            return defaultRecommendations[tingkat_risiko] || defaultRecommendations['Rendah'];
-        }
-
-        // Kalkulasi diagnosis
-        static calculateDiagnosis(selectedSymptoms, usia) {
-            let totalBobot = 0;
-
-            selectedSymptoms.forEach(symptom => {
-                totalBobot += parseFloat(symptom.bobot || 0.1);
-            });
-
-            // Faktor usia
-            if (usia > 45) {
-                totalBobot += 0.20;
-            } else if (usia > 30) {
-                totalBobot += 0.10;
-            }
-
-            totalBobot = Math.min(totalBobot, 1.0);
-            const skorAkhir = parseFloat(totalBobot.toFixed(2));
-
-            let tingkat_risiko, diagnosis;
-
-            if (skorAkhir >= 0.7) {
-                tingkat_risiko = 'Tinggi';
-                diagnosis = 'Anda memiliki risiko tinggi terkena diabetes. Segera periksakan diri ke dokter.';
-            } else if (skorAkhir >= 0.4) {
-                tingkat_risiko = 'Sedang';
-                diagnosis = 'Anda memiliki risiko sedang terkena diabetes. Disarankan mengatur pola hidup.';
-            } else {
-                tingkat_risiko = 'Rendah';
-                diagnosis = 'Risiko diabetes Anda rendah. Tetap jaga pola hidup sehat.';
-            }
-
-            return {
-                tingkat_risiko,
-                diagnosis,
-                skor_akhir: skorAkhir,
-                gejala_count: selectedSymptoms.length
-            };
-        }
-
-        // Grup rekomendasi berdasarkan kategori
-        static groupRecommendationsByCategory(recommendations) {
-            const grouped = {};
-            
-            recommendations.forEach(rec => {
-                const kategori = rec.kategori || 'Lainnya';
-                if (!grouped[kategori]) {
-                    grouped[kategori] = [];
-                }
-                grouped[kategori].push(rec);
-            });
-            
-            return grouped;
-        }
-
-        // Get icon untuk kategori
-        static getCategoryIcon(kategori) {
-            const icons = {
-                'Pola Makan': 'fas fa-utensils',
-                'Aktivitas Fisik': 'fas fa-running',
-                'Pemeriksaan Medis': 'fas fa-stethoscope',
-                'Pemantauan': 'fas fa-clipboard-check',
-                'Lainnya': 'fas fa-lightbulb'
-            };
-            
-            return icons[kategori] || 'fas fa-lightbulb';
-        }
-
-        static getCategoryIconClass(kategori) {
-            const classes = {
-                'Pola Makan': 'icon-pola-makan',
-                'Aktivitas Fisik': 'icon-aktivitas',
-                'Pemeriksaan Medis': 'icon-medis',
-                'Pemantauan': 'icon-pemantauan'
-            };
-            
-            return classes[kategori] || 'icon-pemantauan';
-        }
-    }
-
-    // ✅ 7. FUNGSI UTAMA
-
-    // Fungsi untuk memilih jenis kelamin
+    // 2. Pilih Jenis Kelamin
     function selectGender(gender) {
         selectedGender = gender;
         document.getElementById('jenis_kelamin').value = gender;
-        
-        const maleOption = document.getElementById('genderMale');
-        const femaleOption = document.getElementById('genderFemale');
-        
-        if (gender === 'Laki-laki') {
-            maleOption.classList.add('selected');
-            femaleOption.classList.remove('selected');
-        } else {
-            femaleOption.classList.add('selected');
-            maleOption.classList.remove('selected');
-        }
+        document.getElementById('genderMale').classList.toggle('selected', gender === 'Laki-laki');
+        document.getElementById('genderFemale').classList.toggle('selected', gender === 'Perempuan');
     }
 
-    // Fungsi untuk memuat gejala
+    // 3. Load Gejala dari Server
     async function loadSymptoms() {
+        const container = document.getElementById('symptomsContainer');
         try {
-            const container = document.getElementById('symptomsContainer');
+            // Langsung tembak ke endpoint relatif server.js kita
+            const response = await fetch('/api/symptoms');
+            symptoms = await response.json();
             
-            container.innerHTML = `
-                <div class="col-span-2 flex justify-center items-center py-8">
-                    <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                    <span class="ml-3 text-gray-500">Memuat gejala...</span>
-                </div>
-            `;
-            
-            symptoms = await DiagnosisService.getSymptoms();
-            
-            if (symptoms && symptoms.length > 0) {
-                displaySymptoms();
-            } else {
-                throw new Error('Tidak ada data gejala');
+            if (symptoms.length > 0) {
+                container.innerHTML = '';
+                symptoms.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'symptom-card bg-white p-4 rounded-lg border border-gray-200';
+                    div.innerHTML = `
+                        <label class="flex items-center cursor-pointer">
+                            <input type="checkbox" value="${s.id}" class="symptom-checkbox hidden" onchange="toggleSymptom(this, ${s.id}, '${s.nama_gejala}', ${s.bobot || 0.1})">
+                            <div class="symptom-label flex items-start rounded-lg p-3 transition w-full">
+                                <div class="checkmark"><i class="fas fa-check"></i></div>
+                                <div class="flex-1">
+                                    <span class="text-gray-700 font-medium block">${s.nama_gejala}</span>
+                                </div>
+                            </div>
+                        </label>`;
+                    container.appendChild(div);
+                });
             }
         } catch (error) {
-            console.error('❌ Error loading symptoms:', error);
-            symptoms = DiagnosisService.getFallbackSymptoms();
-            displaySymptoms();
-            Toast.show('Menggunakan data gejala lokal', 'warning');
+            console.error('Gagal memuat gejala:', error);
+            container.innerHTML = '<p class="text-red-500">Gagal terhubung ke database server.</p>';
         }
     }
 
-    // Fungsi untuk menampilkan gejala
-    function displaySymptoms() {
-        const container = document.getElementById('symptomsContainer');
-        container.innerHTML = '';
-        
-        if (!symptoms || symptoms.length === 0) {
-            container.innerHTML = `
-                <div class="col-span-2 text-center py-8">
-                    <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mb-2"></i>
-                    <p class="text-gray-500">Tidak ada gejala yang tersedia</p>
-                </div>
-            `;
-            return;
+    // 4. Handle Ceklis Gejala
+    function toggleSymptom(checkbox, id, nama, bobot) {
+        const label = checkbox.nextElementSibling;
+        if (checkbox.checked) {
+            selectedSymptoms.push({ id, nama, bobot });
+            label.classList.add('bg-blue-50', 'border-blue-300');
+        } else {
+            selectedSymptoms = selectedSymptoms.filter(s => s.id !== id);
+            label.classList.remove('bg-blue-50', 'border-blue-300');
         }
-        
-        symptoms.forEach(symptom => {
-            const symptomElement = document.createElement('div');
-            symptomElement.className = 'symptom-card bg-white p-4 rounded-lg border border-gray-200';
-            
-            const symptomName = symptom.nama_gejala || symptom.name || `Gejala ${symptom.id}`;
-            const symptomDesc = symptom.deskripsi || symptom.description || '';
-            
-            symptomElement.innerHTML = `
-                <label class="flex items-center cursor-pointer">
-                    <input type="checkbox" value="${symptom.id}" class="symptom-checkbox hidden">
-                    <div class="symptom-label flex items-start rounded-lg p-3 transition w-full hover:bg-gray-50">
-                        <div class="checkmark">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <div class="flex-1">
-                            <span class="text-gray-700 font-medium block">${symptomName}</span>
-                            ${symptomDesc ? `<p class="text-sm text-gray-500 mt-1">${symptomDesc}</p>` : ''}
-                        </div>
-                    </div>
-                </label>
-            `;
-            
-            container.appendChild(symptomElement);
-            
-            const checkbox = symptomElement.querySelector('.symptom-checkbox');
-            const label = symptomElement.querySelector('.symptom-label');
-            
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    selectedSymptoms.push({
-                        id: symptom.id,
-                        nama: symptomName,
-                        bobot: symptom.bobot || 0.1,
-                        kode_gejala: symptom.kode_gejala
-                    });
-
-                    label.classList.add('bg-blue-50', 'border', 'border-blue-300');
-                } else {
-                    selectedSymptoms = selectedSymptoms.filter(s => s.id !== symptom.id);
-                    label.classList.remove('bg-blue-50', 'border', 'border-blue-300');
-                }
-            });
-        });
     }
 
-    // Fungsi untuk menampilkan rekomendasi
-    function displayRecommendations(recommendations) {
-        const groupedRecs = DiagnosisService.groupRecommendationsByCategory(recommendations);
-        
-        let recommendationsHTML = '<div class="recommendations-container">';
-        
-        Object.keys(groupedRecs).forEach(kategori => {
-            const categoryRecs = groupedRecs[kategori];
-            const iconClass = DiagnosisService.getCategoryIconClass(kategori);
-            const icon = DiagnosisService.getCategoryIcon(kategori);
-            
-            recommendationsHTML += `
-                <div class="recommendation-category">
-                    <div class="category-header">
-                        <div class="category-icon ${iconClass}">
-                            <i class="${icon}"></i>
-                        </div>
-                        <h4 class="font-medium text-gray-800">${kategori}</h4>
-                    </div>
-                    <ul class="space-y-2">
-                        ${categoryRecs.map(rec => `
-                            <li class="flex items-start bg-white p-3 rounded-lg border border-gray-200">
-                                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
-                                <div class="flex-1">
-                                    <h5 class="font-medium text-gray-800 mb-1">${rec.judul}</h5>
-                                    <p class="text-sm text-gray-600">${rec.deskripsi}</p>
-                                </div>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
-            `;
-        });
-        
-        recommendationsHTML += '</div>';
-        
-        return recommendationsHTML;
-    }
-
-    // Fungsi untuk menampilkan hasil
-    async function displayResult(result, recommendations) {
-        const hasilContainer = document.getElementById('hasilContainer');
-        const hasilElement = document.getElementById('hasil');
-        
-        let riskClass, riskBadgeClass;
-        switch(result.tingkat_risiko) {
-            case 'Tinggi':
-                riskClass = 'risk-high';
-                riskBadgeClass = 'risk-high-badge';
-                break;
-            case 'Sedang':
-                riskClass = 'risk-medium';
-                riskBadgeClass = 'risk-medium-badge';
-                break;
-            case 'Rendah':
-                riskClass = 'risk-low';
-                riskBadgeClass = 'risk-low-badge';
-                break;
-            default:
-                riskClass = 'risk-low';
-                riskBadgeClass = 'risk-low-badge';
-        }
-        
-        const recommendationsHTML = displayRecommendations(recommendations);
-        
-        hasilElement.innerHTML = `
-            <div class="${riskClass} p-6 rounded-lg">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="font-semibold text-lg">Hasil Diagnosis</h3>
-                    <div class="flex items-center space-x-2">
-                        <span class="risk-badge ${riskBadgeClass}">${result.tingkat_risiko}</span>
-                        <span class="text-sm text-gray-500">Skor: ${result.skor_akhir}</span>
-                    </div>
-                </div>
-                <p class="mb-4 text-gray-700">${result.diagnosis}</p>
-                
-                <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <p class="text-sm text-blue-700">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        Anda memilih ${result.gejala_count} gejala yang berkaitan dengan diabetes
-                    </p>
-                </div>
-                
-                ${result.user_id ? `
-                <div class="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <p class="text-sm text-green-700">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        Data diagnosis telah disimpan di database
-                    </p>
-                </div>
-                ` : ''}
-            </div>
-            
-            <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200">
-                <h3 class="font-semibold text-lg text-blue-800 mb-3 flex items-center">
-                    <i class="fas fa-lightbulb mr-2"></i> Rekomendasi untuk Anda (Risiko ${result.tingkat_risiko})
-                </h3>
-                ${recommendationsHTML}
-            </div>
-        `;
-        
-        hasilContainer.classList.remove('hidden');
-        hasilContainer.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Fungsi untuk reset form
-    function resetForm() {
-        document.getElementById('diagnosisForm').reset();
-        selectedSymptoms = [];
-        selectedGender = '';
-        
-        document.getElementById('genderMale').classList.remove('selected');
-        document.getElementById('genderFemale').classList.remove('selected');
-        
-        document.querySelectorAll('.symptom-checkbox').forEach(checkbox => {
-            checkbox.checked = false;
-            const label = checkbox.nextElementSibling;
-            label.classList.remove('bg-blue-50', 'border', 'border-blue-300');
-        });
-        
-        document.getElementById('hasilContainer').classList.add('hidden');
-        
-        Toast.show('Form telah direset', 'success');
-    }
-
-    // ✅ 8. EVENT LISTENER UNTUK FORM SUBMISSION
-    document.getElementById('diagnosisForm').addEventListener('submit', async function(e) {
+    // 5. Submit Diagnosa (Proses Utama)
+    document.getElementById('diagnosisForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Validasi
-        const nama = document.getElementById('nama_lengkap').value.trim();
-        const usia = document.getElementById('usia').value;
-        
-        if (!nama || !usia || !selectedGender) {
-            Toast.show('Silakan lengkapi semua data', 'warning');
-            return;
-        }
-        
         if (selectedSymptoms.length === 0) {
-            Toast.show('Silakan pilih minimal satu gejala', 'warning');
+            alert('Pilih minimal satu gejala!');
             return;
         }
-        
-        const submitButton = this.querySelector('button[type="submit"]');
-        const originalText = submitButton.innerHTML;
-        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
-        submitButton.disabled = true;
-        
+
+        const btn = e.target.querySelector('button');
+        btn.disabled = true;
+        btn.innerText = 'Memproses...';
+
         try {
-            // 1. Simpan user
+            // A. Simpan Data User & Hitung Hasil
             const userData = {
-                nama_lengkap: nama,
-                usia: parseInt(usia),
-                jenis_kelamin: selectedGender
+                nama_lengkap: document.getElementById('nama_lengkap').value,
+                usia: document.getElementById('usia').value,
+                jenis_kelamin: selectedGender,
+                gejala: selectedSymptoms.map(s => s.id)
             };
-            
-            console.log('💾 Menyimpan user:', userData);
-            const userResult = await DiagnosisService.createUser(userData);
-            const userId = userResult.id;
-            
-            // 2. Simpan gejala user
-            const symptomIds = selectedSymptoms.map(s => s.id);
-            await DiagnosisService.addUserSymptoms(userId, symptomIds);
-            
-            // 3. Hitung diagnosis
-            const usiaNum = parseInt(usia);
-            const diagnosisResult = DiagnosisService.calculateDiagnosis(selectedSymptoms, usiaNum);
-            
-            // 4. Ambil rekomendasi
-            console.log('📋 Mengambil rekomendasi untuk risiko:', diagnosisResult.tingkat_risiko);
-            const recommendations = await DiagnosisService.getRecommendationsByRisk(diagnosisResult.tingkat_risiko);
-            
-            // 5. Simpan diagnosis
-            const diagnosisData = {
-                user_id: userId,
-                tingkat_risiko: diagnosisResult.tingkat_risiko,
-                skor_akhir: diagnosisResult.skor_akhir,
-                rekomendasi_khusus: diagnosisResult.diagnosis
-            };
-            
-            await DiagnosisService.createDiagnosis(diagnosisData);
-            
-            // 6. Tampilkan hasil
-            await displayResult({
-                ...diagnosisResult,
-                user_id: userId
-            }, recommendations);
-            
-            Toast.show('Diagnosis berhasil!', 'success');
-            
+
+            const response = await fetch('/api/diagnosis/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showResult(result);
+            } else {
+                alert('Gagal memproses diagnosis');
+            }
         } catch (error) {
-            console.error('❌ Error in diagnosis process:', error);
-            
-            // Fallback: tampilkan diagnosis lokal
-            const usiaNum = parseInt(usia);
-            const diagnosisResult = DiagnosisService.calculateDiagnosis(selectedSymptoms, usiaNum);
-            const fallbackRecs = DiagnosisService.getFallbackRecommendations(diagnosisResult.tingkat_risiko);
-            
-            displayResult({
-                ...diagnosisResult,
-                user_id: null
-            }, fallbackRecs);
-            
-            Toast.show('Diagnosis berhasil! (Menggunakan data lokal)', 'warning');
+            console.error('Error:', error);
+            alert('Terjadi kesalahan koneksi ke server.');
         } finally {
-            submitButton.innerHTML = originalText;
-            submitButton.disabled = false;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-stethoscope mr-2"></i> Diagnosa Sekarang';
         }
     });
 
-    // ✅ 9. INITIALIZE PAGE
-    function initializePage() {
-        console.log('🚀 Initializing diagnosis page...');
-        console.log('📡 API Base URL:', API_BASE_URL);
-        console.log('⚙️ API Endpoints:', window.API_CONFIG.ENDPOINTS);
+    function showResult(data) {
+        const container = document.getElementById('hasilContainer');
+        const hasil = document.getElementById('hasil');
+        container.classList.remove('hidden');
         
-        // Load symptoms
-        loadSymptoms();
+        hasil.innerHTML = `
+            <div class="p-4 rounded-lg bg-blue-50 border-l-4 border-blue-500">
+                <h3 class="font-bold text-lg">Tingkat Risiko: ${data.tingkat_risiko}</h3>
+                <p>${data.diagnosis}</p>
+                <p class="text-sm mt-2 text-gray-500">Skor Keyakinan: ${(data.skor_akhir * 100).toFixed(0)}%</p>
+            </div>
+            <div class="mt-4">
+                <h4 class="font-semibold mb-2">Saran Medis:</h4>
+                <ul class="list-disc ml-5 text-sm">
+                    ${data.rekomendasi.map(r => `<li><strong>${r.judul}:</strong> ${r.deskripsi}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+        window.scrollTo({ top: container.offsetTop, behavior: 'smooth' });
     }
 
-    // ✅ 10. START EVERYTHING
-    document.addEventListener('DOMContentLoaded', initializePage);
-  </script>
+    function resetForm() {
+        location.reload();
+    }
+
+    // Jalankan load gejala saat web dibuka
+    loadSymptoms();
+</script>
 </body>
 </html>
