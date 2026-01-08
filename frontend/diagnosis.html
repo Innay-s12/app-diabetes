@@ -306,274 +306,194 @@
   </footer>
 
   <script>
-    // 1. Variabel Global
     let symptoms = [];
     let selectedSymptoms = [];
     let selectedGender = '';
 
-    // 2. Toast Notification
     function showToast(message, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      
-      setTimeout(() => toast.classList.add('show'), 10);
-      setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 
-    // 3. Pilih Jenis Kelamin
     function selectGender(gender) {
-      selectedGender = gender;
-      document.getElementById('jenis_kelamin').value = gender;
-      document.getElementById('genderMale').classList.toggle('selected', gender === 'Laki-laki');
-      document.getElementById('genderFemale').classList.toggle('selected', gender === 'Perempuan');
+        selectedGender = gender;
+        document.getElementById('jenis_kelamin').value = gender;
+        document.getElementById('genderMale').classList.toggle('selected', gender === 'Laki-laki');
+        document.getElementById('genderFemale').classList.toggle('selected', gender === 'Perempuan');
     }
 
-    // 4. Load Gejala dari Server - PERBAIKAN: Gunakan endpoint yang benar
+    // LOAD GEJALA - Sudah disesuaikan dengan respon server { success: true, data: [...] }
     async function loadSymptoms() {
-  const container = document.getElementById('symptomsContainer');
-  try {
-    // Pastikan path ini sesuai dengan di server.js (misal: /api/gejala)
-    const response = await fetch('/api/gejala'); 
-    
-    if (!response.ok) throw new Error('Gagal mengambil data dari server');
-    
-    const result = await response.json();
-    
-    // Normalisasi data: menangani jika result adalah array langsung atau objek {data: []}
-    symptoms = Array.isArray(result) ? result : (result.data || []);
+        const container = document.getElementById('symptomsContainer');
+        try {
+            const response = await fetch('/gejala'); 
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const result = await response.json();
+            
+            // Mengambil array dari result.data sesuai struktur server.js terbaru
+            symptoms = result.data || [];
 
-    if (symptoms.length > 0) {
-      container.innerHTML = '';
-      symptoms.forEach(s => {
-        const div = document.createElement('div');
-        div.className = 'symptom-card bg-white p-2 rounded-lg border border-gray-200';
-        div.innerHTML = `
-          <label class="flex items-center cursor-pointer w-full">
-            <input type="checkbox" value="${s.id}" class="symptom-checkbox hidden" 
-                   onchange="toggleSymptom(this, ${s.id}, '${s.nama_gejala}', ${s.bobot || 0})">
-            <div class="symptom-label flex items-center rounded-lg p-3 transition w-full border border-transparent hover:bg-blue-50">
-              <div class="checkmark"><i class="fas fa-check"></i></div>
-              <div class="flex-1">
-                <span class="text-gray-700 font-medium text-sm block">${s.nama_gejala}</span>
-              </div>
-            </div>
-          </label>`;
-        container.appendChild(div);
-      });
-      document.getElementById('selectedCount').classList.remove('hidden');
-    } else {
-      container.innerHTML = '<p class="text-gray-500 text-center py-4 col-span-2">Tidak ada data gejala.</p>';
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    container.innerHTML = `<div class="col-span-2 text-center text-red-500">Gagal terhubung ke server.</div>`;
-  }
-}
-
-    // 5. Handle Ceklis Gejala
-    function toggleSymptom(checkbox, id, nama, bobot) {
-      const label = checkbox.nextElementSibling;
-      if (checkbox.checked) {
-        selectedSymptoms.push({ id, nama, bobot });
-        label.classList.add('bg-blue-50', 'border-blue-300');
-      } else {
-        selectedSymptoms = selectedSymptoms.filter(s => s.id !== id);
-        label.classList.remove('bg-blue-50', 'border-blue-300');
-      }
-      
-      // Update counter
-      const counter = document.getElementById('selectedCount');
-      counter.textContent = `${selectedSymptoms.length} gejala dipilih`;
-      counter.classList.toggle('text-blue-600', selectedSymptoms.length > 0);
-    }
-
-    // 6. Submit Diagnosa (Proses Utama) - PERBAIKAN: Gunakan endpoint yang benar
-    document.getElementById('diagnosisForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      // Validasi
-      if (!selectedGender) {
-        showToast('Pilih jenis kelamin terlebih dahulu', 'warning');
-        return;
-      }
-      
-      if (selectedSymptoms.length === 0) {
-        showToast('Pilih minimal satu gejala!', 'warning');
-        return;
-      }
-
-      const btn = document.getElementById('submitBtn');
-      const originalText = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<div class="loading mr-2"></div> Memproses...';
-
-      try {
-        // Data yang dikirim ke server
-        const userData = {
-          nama_lengkap: document.getElementById('nama_lengkap').value,
-          usia: document.getElementById('usia').value,
-          jenis_kelamin: selectedGender,
-          gejala: selectedSymptoms.map(s => s.id)
-        };
-
-        console.log('Mengirim data:', userData);
-
-        // PERBAIKAN: Gunakan endpoint yang sesuai dengan server.js Anda
-        // Jika server.js menggunakan app.post('/diagnosa', ...) maka gunakan '/diagnosa'
-        const response = await fetch('/diagnosa', { // atau '/api/diagnosa' sesuai konfigurasi server
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(userData)
-        });
-
-        const result = await response.json();
-        console.log('Hasil diagnosis:', result);
-
-        if (result.success) {
-          showResult(result);
-          showToast('Diagnosis berhasil!', 'success');
-        } else {
-          showToast(result.message || 'Gagal memproses diagnosis', 'error');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        showToast('Terjadi kesalahan koneksi ke server', 'error');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-      }
-    });
-
-    // 7. Tampilkan Hasil
-    function showResult(data) {
-      const container = document.getElementById('hasilContainer');
-      const hasil = document.getElementById('hasil');
-      container.classList.remove('hidden');
-      
-      // Tentukan kelas risiko berdasarkan tingkat_risiko
-      let riskClass = 'risk-low';
-      let riskBadge = 'risk-low-badge';
-      
-      if (data.tingkat_risiko && data.tingkat_risiko.toLowerCase().includes('tinggi')) {
-        riskClass = 'risk-high';
-        riskBadge = 'risk-high-badge';
-      } else if (data.tingkat_risiko && data.tingkat_risiko.toLowerCase().includes('sedang')) {
-        riskClass = 'risk-medium';
-        riskBadge = 'risk-medium-badge';
-      }
-      
-      hasil.innerHTML = `
-        <div class="p-5 rounded-lg ${riskClass} fade-in">
-          <div class="flex justify-between items-start mb-3">
-            <h3 class="font-bold text-lg text-gray-800">Hasil Diagnosis</h3>
-            <span class="risk-badge ${riskBadge}">${data.tingkat_risiko || 'Tidak Diketahui'}</span>
-          </div>
-          
-          <div class="mb-4">
-            <h4 class="font-semibold text-gray-700 mb-2">Ringkasan:</h4>
-            <p class="text-gray-600">${data.diagnosis || 'Tidak ada diagnosis tersedia'}</p>
-          </div>
-          
-          <div class="grid grid-cols-2 gap-4 text-sm">
-            <div class="bg-white p-3 rounded-lg">
-              <p class="text-gray-500">Skor Keyakinan</p>
-              <p class="font-bold text-xl ${riskClass.replace('risk-', 'text-')}">
-                ${data.skor_akhir ? (data.skor_akhir * 100).toFixed(1) : '0'}%
-              </p>
-            </div>
-            <div class="bg-white p-3 rounded-lg">
-              <p class="text-gray-500">Gejala Dipilih</p>
-              <p class="font-bold text-xl text-blue-600">${selectedSymptoms.length}</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="mt-6 fade-in" style="animation-delay: 0.2s">
-          <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
-            <i class="fas fa-stethoscope mr-2 text-blue-600"></i> Rekomendasi & Saran Medis
-          </h4>
-          <div class="space-y-3">
-            ${data.rekomendasi && data.rekomendasi.length > 0 
-              ? data.rekomendasi.map(r => `
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                  <h5 class="font-medium text-gray-700 mb-1">${r.judul || 'Rekomendasi'}</h5>
-                  <p class="text-gray-600 text-sm">${r.deskripsi || 'Tidak ada deskripsi'}</p>
-                </div>
-              `).join('')
-              : '<p class="text-gray-500 text-center py-4">Tidak ada rekomendasi tersedia</p>'
+            if (symptoms.length > 0) {
+                container.innerHTML = '';
+                symptoms.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'symptom-card bg-white p-2 rounded-lg border border-gray-200';
+                    div.innerHTML = `
+                        <label class="flex items-center cursor-pointer w-full">
+                            <input type="checkbox" value="${s.id}" class="symptom-checkbox hidden" 
+                                   onchange="toggleSymptom(this, ${s.id}, '${s.nama_gejala.replace(/'/g, "\\'")}', ${s.bobot || 0})">
+                            <div class="symptom-label flex items-center rounded-lg p-3 transition w-full border border-transparent">
+                                <div class="checkmark"><i class="fas fa-check"></i></div>
+                                <div class="flex-1">
+                                    <span class="text-gray-700 font-medium text-sm block">${s.nama_gejala}</span>
+                                </div>
+                            </div>
+                        </label>`;
+                    container.appendChild(div);
+                });
+                document.getElementById('selectedCount').classList.remove('hidden');
+            } else {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4 col-span-2">Gejala tidak ditemukan di database.</p>';
             }
-          </div>
-        </div>
-        
-        <div class="mt-6 fade-in" style="animation-delay: 0.4s">
-          <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
-            <i class="fas fa-info-circle mr-2 text-blue-600"></i> Informasi Penting
-          </h4>
-          <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-            <p class="text-sm text-gray-700">
-              <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
-              Hasil diagnosis ini merupakan perkiraan berdasarkan sistem pakar. Disarankan untuk 
-              berkonsultasi langsung dengan dokter untuk diagnosis yang lebih akurat.
-            </p>
-          </div>
-        </div>
-      `;
-      
-      // Scroll ke hasil
-      window.scrollTo({ top: container.offsetTop - 20, behavior: 'smooth' });
-    }
-
-    // 8. Reset Form
-    function resetForm() {
-      // Reset semua input
-      document.getElementById('diagnosisForm').reset();
-      document.getElementById('jenis_kelamin').value = '';
-      selectedGender = '';
-      selectedSymptoms = [];
-      
-      // Reset UI gender
-      document.getElementById('genderMale').classList.remove('selected');
-      document.getElementById('genderFemale').classList.remove('selected');
-      
-      // Reset checkbox gejala
-      document.querySelectorAll('.symptom-checkbox').forEach(cb => {
-        cb.checked = false;
-        cb.nextElementSibling.classList.remove('bg-blue-50', 'border-blue-300');
-      });
-      
-      // Update counter
-      document.getElementById('selectedCount').textContent = '0 gejala dipilih';
-      document.getElementById('selectedCount').classList.remove('text-blue-600');
-      
-      // Sembunyikan hasil
-      document.getElementById('hasilContainer').classList.add('hidden');
-      
-      // Scroll ke atas
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      showToast('Form telah direset', 'success');
-    }
-
-    // 9. Jalankan saat halaman dimuat
-    document.addEventListener('DOMContentLoaded', () => {
-      loadSymptoms();
-      
-      // Tambahkan event listener untuk validasi real-time
-      document.getElementById('nama_lengkap').addEventListener('input', function(e) {
-        if (e.target.value.length > 0) {
-          e.target.classList.remove('border-red-300');
-          e.target.classList.add('border-green-300');
+        } catch (error) {
+            console.error('Error:', error);
+            container.innerHTML = `<div class="col-span-2 text-center text-red-500 p-4">Gagal terhubung ke server. Pastikan server.js berjalan.</div>`;
         }
-      });
+    }
+
+    function toggleSymptom(checkbox, id, nama, bobot) {
+        if (checkbox.checked) {
+            selectedSymptoms.push({ id, nama, bobot });
+        } else {
+            selectedSymptoms = selectedSymptoms.filter(s => s.id !== id);
+        }
+        const counter = document.getElementById('selectedCount');
+        counter.textContent = `${selectedSymptoms.length} gejala dipilih`;
+        counter.classList.toggle('text-blue-600', selectedSymptoms.length > 0);
+    }
+
+    // SUBMIT DIAGNOSA - Sesuai dengan endpoint /diagnosa
+    document.getElementById('diagnosisForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        if (!selectedGender) {
+            showToast('Pilih jenis kelamin terlebih dahulu', 'warning');
+            return;
+        }
+        if (selectedSymptoms.length === 0) {
+            showToast('Pilih minimal satu gejala!', 'warning');
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<div class="loading mr-2"></div> Menganalisis...';
+
+        try {
+            const userData = {
+                nama_lengkap: document.getElementById('nama_lengkap').value,
+                usia: document.getElementById('usia').value,
+                jenis_kelamin: selectedGender,
+                gejala: selectedSymptoms.map(s => s.id) // Mengirim array ID gejala
+            };
+
+            const response = await fetch('/diagnosa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showResult(result);
+                showToast('Diagnosis Berhasil!', 'success');
+            } else {
+                showToast(result.message || 'Gagal memproses data', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('Server tidak merespon', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     });
-  </script>
+
+    function showResult(data) {
+        const container = document.getElementById('hasilContainer');
+        const hasil = document.getElementById('hasil');
+        container.classList.remove('hidden');
+        
+        let riskClass = 'risk-low';
+        let riskBadge = 'risk-low-badge';
+        let textColor = 'text-green-600';
+        
+        if (data.tingkat_risiko.toLowerCase().includes('tinggi')) {
+            riskClass = 'risk-high';
+            riskBadge = 'risk-high-badge';
+            textColor = 'text-red-600';
+        } else if (data.tingkat_risiko.toLowerCase().includes('sedang')) {
+            riskClass = 'risk-medium';
+            riskBadge = 'risk-medium-badge';
+            textColor = 'text-yellow-600';
+        }
+        
+        hasil.innerHTML = `
+            <div class="p-5 rounded-lg ${riskClass} fade-in">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="font-bold text-lg text-gray-800">Analisis Pakar</h3>
+                    <span class="risk-badge ${riskBadge}">${data.tingkat_risiko}</span>
+                </div>
+                <p class="text-gray-700 mb-4">${data.diagnosis}</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-3 rounded-lg shadow-sm">
+                        <p class="text-xs text-gray-500 uppercase">Skor Kepastian</p>
+                        <p class="font-bold text-xl ${textColor}">${(data.skor_akhir * 100).toFixed(0)}%</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm">
+                        <p class="text-xs text-gray-500 uppercase">Input Gejala</p>
+                        <p class="font-bold text-xl text-blue-600">${selectedSymptoms.length}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <h4 class="font-bold text-gray-800 mb-2">Rekomendasi Tindakan:</h4>
+                <div class="space-y-2">
+                    ${data.rekomendasi.map(r => `
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-3">
+                            <p class="font-semibold text-blue-800 text-sm">${r.judul}</p>
+                            <p class="text-blue-700 text-xs">${r.deskripsi}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        
+        window.scrollTo({ top: container.offsetTop - 50, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        document.getElementById('diagnosisForm').reset();
+        selectedSymptoms = [];
+        selectedGender = '';
+        document.getElementById('genderMale').classList.remove('selected');
+        document.getElementById('genderFemale').classList.remove('selected');
+        document.getElementById('hasilContainer').classList.add('hidden');
+        document.getElementById('selectedCount').textContent = '0 gejala dipilih';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        loadSymptoms(); // Muat ulang gejala
+    }
+
+    document.addEventListener('DOMContentLoaded', loadSymptoms);
+</script>
 </body>
 </html>
