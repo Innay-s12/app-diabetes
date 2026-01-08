@@ -335,64 +335,45 @@
 
     // 4. Load Gejala dari Server - PERBAIKAN: Gunakan endpoint yang benar
     async function loadSymptoms() {
-      const container = document.getElementById('symptomsContainer');
-      try {
-        // PERBAIKAN: Gunakan endpoint yang sesuai dengan server.js Anda
-        // Jika server.js menggunakan app.get('/gejala', ...) maka gunakan '/gejala'
-        // Jika menggunakan app.get('/api/gejala', ...) maka gunakan '/api/gejala'
-        const response = await fetch('/gejala'); // atau '/api/gejala' sesuai konfigurasi server
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        
-        // PERBAIKAN: Cek struktur response
-        if (result.success && result.data) {
-          symptoms = result.data;
-        } else if (Array.isArray(result)) {
-          symptoms = result;
-        } else {
-          throw new Error('Format data gejala tidak valid');
-        }
-        
-        if (symptoms.length > 0) {
-          container.innerHTML = '';
-          symptoms.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'symptom-card bg-white p-4 rounded-lg border border-gray-200';
-            div.innerHTML = `
-              <label class="flex items-center cursor-pointer">
-                <input type="checkbox" value="${s.id}" class="symptom-checkbox hidden" 
-                       onchange="toggleSymptom(this, ${s.id}, '${s.nama_gejala.replace(/'/g, "\\'")}', ${s.bobot || 0.1})">
-                <div class="symptom-label flex items-start rounded-lg p-3 transition w-full border">
-                  <div class="checkmark"><i class="fas fa-check"></i></div>
-                  <div class="flex-1">
-                    <span class="text-gray-700 font-medium block">${s.nama_gejala}</span>
-                    <span class="text-xs text-gray-500 mt-1">Bobot: ${s.bobot || 0.1}</span>
-                  </div>
-                </div>
-              </label>`;
-            container.appendChild(div);
-          });
-          
-          // Tampilkan counter gejala yang dipilih
-          document.getElementById('selectedCount').classList.remove('hidden');
-        } else {
-          container.innerHTML = '<p class="text-gray-500 text-center py-4">Tidak ada data gejala ditemukan</p>';
-        }
-      } catch (error) {
-        console.error('Gagal memuat gejala:', error);
-        container.innerHTML = `
-          <div class="col-span-2 text-center py-4">
-            <p class="text-red-500">Gagal memuat data gejala</p>
-            <button onclick="loadSymptoms()" class="mt-2 text-blue-600 hover:text-blue-800">
-              <i class="fas fa-redo mr-1"></i> Coba Lagi
-            </button>
-          </div>`;
-      }
+  const container = document.getElementById('symptomsContainer');
+  try {
+    // Pastikan path ini sesuai dengan di server.js (misal: /api/gejala)
+    const response = await fetch('/api/gejala'); 
+    
+    if (!response.ok) throw new Error('Gagal mengambil data dari server');
+    
+    const result = await response.json();
+    
+    // Normalisasi data: menangani jika result adalah array langsung atau objek {data: []}
+    symptoms = Array.isArray(result) ? result : (result.data || []);
+
+    if (symptoms.length > 0) {
+      container.innerHTML = '';
+      symptoms.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'symptom-card bg-white p-2 rounded-lg border border-gray-200';
+        div.innerHTML = `
+          <label class="flex items-center cursor-pointer w-full">
+            <input type="checkbox" value="${s.id}" class="symptom-checkbox hidden" 
+                   onchange="toggleSymptom(this, ${s.id}, '${s.nama_gejala}', ${s.bobot || 0})">
+            <div class="symptom-label flex items-center rounded-lg p-3 transition w-full border border-transparent hover:bg-blue-50">
+              <div class="checkmark"><i class="fas fa-check"></i></div>
+              <div class="flex-1">
+                <span class="text-gray-700 font-medium text-sm block">${s.nama_gejala}</span>
+              </div>
+            </div>
+          </label>`;
+        container.appendChild(div);
+      });
+      document.getElementById('selectedCount').classList.remove('hidden');
+    } else {
+      container.innerHTML = '<p class="text-gray-500 text-center py-4 col-span-2">Tidak ada data gejala.</p>';
     }
+  } catch (error) {
+    console.error('Error:', error);
+    container.innerHTML = `<div class="col-span-2 text-center text-red-500">Gagal terhubung ke server.</div>`;
+  }
+}
 
     // 5. Handle Ceklis Gejala
     function toggleSymptom(checkbox, id, nama, bobot) {
