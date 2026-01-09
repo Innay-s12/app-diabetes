@@ -96,6 +96,9 @@ app.get('/api/stats', async (req, res) => {
     }
 });
 
+app.get('/', (req, res) => {
+    res.status(200).send('API Sistem Diagnosa OK');
+});
 // ==================== START SERVER ====================
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server berjalan di port ${PORT}`);
