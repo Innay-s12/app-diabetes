@@ -2,26 +2,31 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 const mysql = require('mysql2');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-});
-
 
 // ==================== DATABASE CONNECTION ====================
-const pool = mysql.createPool({
-    host: process.env.MYSQLHOST || 'localhost',
-    user: process.env.MYSQLUSER || 'root',
-    password: process.env.MYSQLPASSWORD || '',
-    database: process.env.MYSQLDATABASE || 'diabetes_db',
-    port: process.env.MYSQLPORT || 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+let pool;
+
+try {
+    pool = mysql.createPool({
+        host: process.env.MYSQLHOST,
+        user: process.env.MYSQLUSER,
+        password: process.env.MYSQLPASSWORD,
+        database: process.env.MYSQLDATABASE,
+        port: process.env.MYSQLPORT,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+    });
+
+    console.log("✅ MySQL pool created");
+} catch (err) {
+    console.error("❌ MySQL init error:", err.message);
+}
 
 const executeQuery = (sql, params = []) => {
     return new Promise((resolve, reject) => {
@@ -123,7 +128,9 @@ app.get('/api/stats', async (req, res) => {
 });
 
 // ==================== SERVE HTML PAGES ====================
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'diagnosis.html')));
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'diagnosis.html'));
+});
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 
